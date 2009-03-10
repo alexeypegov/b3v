@@ -1,0 +1,251 @@
+body, p, form {
+  margin: 0;
+}
+
+body {
+  font: 100%/1.25 "Times", serif;
+}
+
+p {
+  margin-top: 0.5em;
+}
+
+textarea {
+  font-size: 90%;
+  padding: 2px 0;
+  color: #555;
+}
+
+.ll a {
+  color: #7070CC;
+  text-decoration: none;
+}
+
+.ll a:hover {
+  color: blue;
+  text-decoration: underline;
+}
+
+.lg a {
+  color: #777;
+  text-decoration: none;
+}
+
+.lg a:hover {
+  color: blue;
+  text-decoration: underline;
+}
+
+.clearfix:after { /* !!! THE FUCKING MAGIC !!! */
+  content: ".";
+  display: block;
+  height: 0;
+  clear: both;
+  visibility: hidden;
+}
+
+/*** HEADER ***/
+
+#head {
+  margin: 2em;
+}
+
+#head #title {
+  font-weight: normal;
+  border-bottom: 2px solid #000;
+  font-size: 200%;
+  margin-bottom: 0;
+}
+
+#head #top {
+  float: right;
+}
+
+#head #sub {
+  color: #777;
+}
+
+#container {
+  margin: 1em 2em;
+  margin-bottom: 5em;
+}
+
+#foot {
+  border-top: 1px solid #eee;
+  margin: 2em;
+  padding-top: 0.5em;
+  font-size: 90%;
+  color: #777;
+}
+
+#foot #cp {
+  float: right;
+  color: #aaa;
+}
+
+/*** NAVIGATION ***/
+
+#container #nav {
+  margin: 1em 0;
+}
+
+/*** AUTH ***/
+
+.auth {
+  margin: 0.5em 0;
+}
+
+.auth .head {
+  margin-bottom: 5px;
+}
+
+.auth .form {
+}
+
+.auth .form input {
+  border: 1px solid #737373;
+  font-size: 90%;
+  padding: 2px;
+  color: #555;
+}
+
+.auth .form .uname {
+  margin-left: 5px;
+  width: 20em;
+}
+
+.auth .help {
+}
+
+.auth .form .openid {
+  background: #fff url('/images/openid.gif') 2px 50% no-repeat;
+  padding-left: 20px;
+}
+
+.auth .form .lj {
+  background: #fff url('/images/lj.gif') 2px 50% no-repeat;
+  padding-left: 20px;
+}
+
+.auth .form .other {
+  padding-right: 20px;
+}
+
+/*** NOTES ***/
+
+#notes {
+  width: 90%;
+}
+
+#notes .note {
+  margin-bottom: 3em;
+}
+
+#notes .note .title .name {
+  color: #aaa;
+  font-size: 130%;
+}
+
+#notes .note .title .info {
+  font-size: 85%;
+  color: #777;
+}
+
+#notes .note .title .info a {
+  color: #7070CC;
+  text-decoration: none;
+}
+
+#notes .note .text {
+  margin: 1em 5em 0.5em 3em;
+  color: #222;
+}
+
+#notes .note .text ul, ol {
+  padding-left: 0;
+}
+
+#notes .note .text a {
+  color: #444;
+}
+
+/*** COMMENTS ***/
+
+.cwl {
+  width: 80%;
+  margin-left: 3em;
+  font-size: 87.5%;
+  color: #555;
+}
+
+.cwl .ba {
+  height: 16px;
+  width: 10%;
+  margin-left: 1em;
+  background: #fff url('/i/arrow.png') no-repeat;
+}
+
+.cwl .cs {
+  background-color: #EAF0F6;
+}
+
+.cwl .cs .c {
+  padding: 0.5em 0.7em;
+  border-bottom: 1px solid #fff;
+}
+
+.cwl .cs .c .a {
+  color: #777;
+}
+
+.cwl .cs .c .a a {
+  color: #7070CC;
+}
+
+.cwl textarea {
+  resize: none;
+  overflow: auto auto;
+  width: 100%;
+}
+
+.cw {
+  margin-left: 3em;
+  font-size: 87.5%;
+}
+
+.cw .ga {
+  height: 16px;
+  width: 10%;
+  margin-left: 1em;
+  background: #fff url('/i/arrow2.png') no-repeat;
+}
+
+.cw .ba {
+  height: 16px;
+  width: 10%;
+  margin-left: 1em;
+  background: #fff url('/i/arrow.png') no-repeat;
+}
+
+.cw .g {
+  float: left;
+  padding: 0.5em 0.7em;
+  background-color: #eee;
+  border-right: 1px solid #fff;
+}
+
+.cw .b {
+  float: left;
+  padding: 0.5em 0.7em;
+  background-color: #EAF0F6;
+}
+
+.commentform .buttons {
+  font: 90% "Arial", serif;
+  padding-top: 5px;
+}
+
+.commentform input {
+  font: 90% "Arial", serif;
+  margin-right: 1em;
+}
