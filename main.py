@@ -20,13 +20,17 @@ class Note(db.Model):
 	tags = db.ListProperty(db.Category)
 	draft = db.BooleanProperty(default=True)
 	created_at = db.DateTimeProperty(auto_now_add=True)
+	
+	def get_absolute_url(self):
+	  # todo: !?&, etc!
+	  return u'/note/%i-%s' % (self.key().id(), re.sub('\s+', '-', self.title.lower()))
 
 class Comment(db.Model):
 	note = db.ReferenceProperty(Note, collection_name='comments')
 	author = db.UserProperty()
 	content = db.StringProperty()
 	created_at = db.DateTimeProperty(auto_now_add=True)
-
+	
 class MainHandler(webapp.RequestHandler):
 	""" Handles index page """
 	def get(self):
