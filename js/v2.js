@@ -143,7 +143,6 @@ clickHandlers.create = function(e) {
 		form.find('input[type=submit]').click(function(T) {
 			if (!form.selectEmptyFormElement()) {
 				form.find('input[type=submit]').disable();
-				alert(form.getFormData());
 				$.postJSON('/create', form.getFormData(), function(data) {
 					// todo!!!
 				});
@@ -157,91 +156,37 @@ clickHandlers.cancelCreate = function(e) {
 };
 
 clickHandlers.comment = function(e) {
-  var form = '<div class="area"><textarea name="comment" rows="1"></textarea></div>' + 
-      '<div class="auth">' + 
-      '<div class="form"><select name="type">' + 
-      '<option value="0">OpenID</option>' + 
-      '<option value="1">LiveJournal</option>' + 
-      '<option value="2">Wordpress</option>' +
-      '<option value="3">Dairy.ru</option>' +
-      '<option value="4">Liveinternet.ru</option>' +
-      '</select><input type="text" class="uname openid" name="user" value="user.yourprovider.com"/>' + 
-      '<input type="checkbox" checked="true"/><label for="">Запомнить меня на этом компьютере</label>' + 
-      '</div></div>' +
-      '<div class="buttons ll"><input type="submit" value="Войти и все дела..."/>' + 
-      '<a href="#" class="l_cancelComment">Отменить</a></div>';
-
-  if (currentUserId) {
-    form = '<div class="area"><textarea name="comment" rows="1"></textarea></div><div class="buttons ll"><input type="submit" value="Добавить"/><a href="#" class="l_cancelComment">Отменить</a></div>';
-  }
+	var wrapper = $('#new-comment-wrapper');
 
   var N = e.parents(".note");
   var cw = N.find(".cw");
   if (cw.length) {
     cw.hide();
-    cw.after('<div class="cwl"><div class="ba"></div><div class="cs"><div class="c commentform">%(form)</div></div></div>'.replace('%(form)', form));
-  } else {
+		var t = $('<div class="cwl"><div class="ba"></div><div class="cs"><div class="c commentform"></div></div></div>');
+    t.find('.commentform').append(wrapper.html());
+		
+		cw.after(t);
+	} else {
     var cwl = N.find(".cwl");
     if (cwl.length) {
       var pl = cwl.find(".add");
       if (pl.length) {
-        pl.replaceWith('<div class="c commentform">%(form)</div>'.replace('%(form)', form));
+        pl.replaceWith('<div class="c commentform">%(form)</div>'.replace('%(form)', wrapper));
       }
     }
   }
 
   N.find("input[type=submit]").click(function(E) {
       var note = $(E.target).parents(".note");
-      var t = note.find("textarea");
-      if (!t.val()) {
-        t.select();
-        return false
-      }
-
-      var u = note.find("input[type=text]");
-      if (u && !u.val()) {
-        u.select();
-        return false
-      }
-
-      // todo: submit
-      note.find("input[type=submit]").disable();
-      submitForm("/session/create", {});
+			if (!note.selectEmptyFormElement()) {
+				note.find("input[type=submit]").disable();
+				$.postJSON('/add-comment', note.getFormData(), function(data) {
+					// todo!!!
+				});
+			}
     });
 
   N.find("textarea").makeExpandable(512, function() {}).focus().keypress();
-
-  var s = N.find("select");
-  if (s) {
-    s.change(function() {
-        var u = N.find(".uname");
-        var _name = "username";
-        var _oname = "user.yourprovider.com";
-        var current = u.val();
-        u.attr("class", "uname");
-        switch (this.value) {
-          case "0": 
-            if (current == _name || current == '') {
-              u.val(_oname);
-              u.select();
-            }
-            break; 
-          default: 
-            if (current == _oname || current == '') {
-              u.val(_name);
-              u.select();
-            }
-        }
-
-        switch (this.value) {
-          case "0": u.addClass("openid"); break;
-          case "1": u.addClass("lj"); break;
-          default: u.addClass("other"); break;
-        }
-
-        u.focus();
-      });
-  }
 };
 
 clickHandlers.cancelComment = function(e) {
@@ -264,22 +209,16 @@ clickHandlers.cancelComment = function(e) {
 clickHandlers.expand = function(e) {
   var P = e.parents(".note");
   if (!P) return;
-  var id = P.attr("id");
+  var id = P.find('input[type=hidden]').attr('value');
   if (!id) return;
   var W = e.parents(".cw");
   if (!W) return;
 
-  $.postJSON("/notes/comments/%(id)".replace("%(id)", id), {}, function(data) {
+  $.postJSON("/fetch-comments", {'note_id': id}, function(data) {
       var C = $('<div class="cwl"><div class="ba"></div></div>');
-      var CS = $('<div class="cs"></div>');
+      var CS = $('<div class="cs">%(data)</div>'.replace('%(data)', data.html));
       C.append(CS);
-      $.each(data, function(i, item) {
-          var user = item.comment.user_name != null ? item.comment.user_name : '<a href="%(url)">%(name)</a>'.replace('%(url)', item.comment.user.identity_url).replace('%(name)', item.comment.user.presentable_name);
-          CS.append('<div class="c"><span>%(text)</span><span class="author ll">&nbsp;&#151;&nbsp;%(user)</span></div>'.replace('%(text)', item.comment.text).replace('%(user)', user));
-        });
-
       CS.append('<div class="c add ll"><a href="#" class="l_comment">Добавить комментарий</a></div>');
-      
       W.replaceWith(C);
   });
 };

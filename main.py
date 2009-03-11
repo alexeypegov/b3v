@@ -33,26 +33,25 @@ class MainHandler(webapp.RequestHandler):
 		path = os.path.join(os.path.dirname(__file__), 'layout.html')
 		
 		try:
-			entries = db.Query(Note).order('-date').fetch(limit=7)
+			entries = db.Query(Note).order('-created_at').fetch(limit=7)
+			user = users.get_current_user()
+			if user:
+				url = users.create_logout_url(self.request.uri)
+			else:
+				url = users.create_login_url(self.request.uri)
+
+			template_values = {
+			  'title': 'test',
+			  'admin': users.is_current_user_admin(),
+				'url': url,
+				'user': user,
+			  'view': 'index.html',
+				'entries': entries
+			}
+
+			self.response.out.write(template.render(path, template_values))
 		except:
 			logging.error('Unable to get notes from the datastore')
-		
-		user = users.get_current_user()
-		if user:
-			url = users.create_logout_url(self.request.uri)
-		else:
-			url = users.create_login_url(self.request.uri)
-		
-		template_values = {
-		  'title': 'test',
-		  'admin': users.is_current_user_admin(),
-			'url': url,
-			'user': user,
-		  'view': 'index.html',
-			'entries': entries
-		}
-		
-		self.response.out.write(template.render(path, template_values))
 
 class NewHandler(webapp.RequestHandler):
   """ Will send a create form """
@@ -85,7 +84,56 @@ class CreateHandler(webapp.RequestHandler):
 		else:
 			logging.debug('Unable to create a post: user is not an admin')
 			self.error(403)
+
+class CommentHandler(webapp.RequestHandler):
+	""" Will add a comment """
+	def post(self):
+		logging.debug('Adding a comment...')
+		if users.get_current_user():
+			note_id = self.request.get('note_id')
+			
+			try:
+				_id = int(note_id)
+			except ValueError:
+				logging.debug('Unable to parse note id: %i' % _id)
+
+			note = Note.get_by_id(_id)
+			if note:
+				logging.debug('Ok, adding the comment to: %s' % note.title)
+				
+				comment = Comment()
+				comment.note = note
+				comment.author = users.get_current_user()
+				comment.content = self.request.get('comment')
+					
+				comment.put()
+			else:
+				logging.debug('Unable to find a note for id: %s' % note_id)
+		else:
+			logging.debug('User should be logged in to be able to post comments!')
+
+class FetchCommentsHandler(webapp.RequestHandler):
+	""" Will return comments for the given note """
+	def post(self):
+		note_id = self.request.get('note_id')
 		
+		try:
+			_id = int(note_id)
+		except ValueError:
+			logging.debug('Unable to parse note id: %s' % note_id)
+
+		note = Note.get_by_id(_id)
+		if note:
+			template_vars = {
+				'comments': note.comments
+			}
+				
+			html = template.render(os.path.join(os.path.dirname(__file__), 'comments.html'), template_vars)
+			self.response.headers['Content-Type'] = 'application/json'
+			simplejson.dump({'html': html}, self.response.out, ensure_ascii=False)
+		else:
+			logging.debug('Unable to get note for id: %i' % _id)
+	
 
 def main():
 	# set logging level
@@ -94,7 +142,9 @@ def main():
 	application = webapp.WSGIApplication([
 	  ('/', MainHandler),
 	  ('/new', NewHandler),
-		('/create', CreateHandler)
+		('/create', CreateHandler),
+		('/add-comment', CommentHandler),
+		('/fetch-comments', FetchCommentsHandler)
 	  ], debug=True)
  	wsgiref.handlers.CGIHandler().run(application)
 
