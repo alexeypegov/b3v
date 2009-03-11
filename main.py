@@ -2,38 +2,99 @@
 
 import os
 import wsgiref.handlers
+import re
+import string
+import logging
 
-
+from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
+from google.appengine.ext import db
 
 from django.utils import simplejson
 
-class MainHandler(webapp.RequestHandler):
+class Note(db.Model):
+	author = db.UserProperty()
+	title = db.StringProperty()
+	content = db.TextProperty()
+	tags = db.ListProperty(db.Category)
+	draft = db.BooleanProperty(default=True)
+	created_at = db.DateTimeProperty(auto_now_add=True)
 
+class Comment(db.Model):
+	note = db.ReferenceProperty(Note, collection_name='comments')
+	author = db.UserProperty()
+	content = db.StringProperty()
+	created_at = db.DateTimeProperty(auto_now_add=True)
+
+class MainHandler(webapp.RequestHandler):
+	""" Handles index page """
 	def get(self):
 		path = os.path.join(os.path.dirname(__file__), 'layout.html')
 		
+		try:
+			entries = db.Query(Note).order('-date').fetch(limit=7)
+		except:
+			logging.error('Unable to get notes from the datastore')
+		
+		user = users.get_current_user()
+		if user:
+			url = users.create_logout_url(self.request.uri)
+		else:
+			url = users.create_login_url(self.request.uri)
+		
 		template_values = {
 		  'title': 'test',
-		  'admin': True,
-		  'view': 'index.html'
+		  'admin': users.is_current_user_admin(),
+			'url': url,
+			'user': user,
+		  'view': 'index.html',
+			'entries': entries
 		}
 		
 		self.response.out.write(template.render(path, template_values))
 
-class CreateHandler(webapp.RequestHandler):
+class NewHandler(webapp.RequestHandler):
   """ Will send a create form """
   def get(self):
     html = template.render(os.path.join(os.path.dirname(__file__), 'create.html'), {})
     self.response.headers['Content-Type'] = 'application/json'
-    self.response.out.write(simplejson.dumps({'html': html}))
+    simplejson.dump({'html': html}, self.response.out, ensure_ascii=False)
 
+class CreateHandler(webapp.RequestHandler):
+	""" Will create a new post """
+	def post(self):
+		logging.debug('Creating a new post...')
+		if users.is_current_user_admin():
+			note = Note()
+			note.author = users.get_current_user()
+			note.title = self.request.get('title')
+			note.content = self.request.get('text')
+			
+			# TODO: draft!
+			
+			tags = map(string.strip, self.request.get('tags').split(','))
+			# tags = map(string.lowercase, tags)
+			try: tags.remove('')
+			except: pass
+			
+			note.tags = map(db.Category, tags)
+			note.put()
+			
+			logging.debug('Post created')
+		else:
+			logging.debug('Unable to create a post: user is not an admin')
+			self.error(403)
+		
 
 def main():
+	# set logging level
+	logging.getLogger().setLevel(logging.DEBUG)
+	
 	application = webapp.WSGIApplication([
 	  ('/', MainHandler),
-	  ('/create', CreateHandler)
+	  ('/new', NewHandler),
+		('/create', CreateHandler)
 	  ], debug=True)
  	wsgiref.handlers.CGIHandler().run(application)
 

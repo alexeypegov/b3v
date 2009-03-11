@@ -35,17 +35,75 @@ jQuery.fn.makeExpandable = function(A, D) {
     return this
 };
 
-function submitForm(action, data) {
-    var C = $('<form method="post"></form>');
-    C.attr("action", action);
-    C.target = "_self";
-    data.next = location.href;
-    for (var name in data) {
-      C.append($('<input type="hidden" name="' + name + '"/>').val(data[name]))
-    }
-    $("body").append(C);
-    C.submit()
-}
+jQuery.fn.submitForm = function(action) {
+  var C = $('<form method="post"></form>');
+  C.attr("action", action);
+  C.target = "_self";
+
+  var data = this.getFormData();
+
+  for (var name in data) {
+    C.append($('<input type="hidden" name="' + name + '"/>').val(data[name]));
+  }
+
+  $("body").append(C);
+  C.submit();
+};
+
+jQuery.fn.getFormData = function() {
+  var result = {};
+
+  var _element = this;
+  jQuery.each(["input", "textarea", "select"], function() {
+    _element.find(this.toString()).each(function() {
+      var k = $(this);
+      if (k.attr("type") != 'submit') {
+        var key = k.attr("name");
+        if (key.charAt(key.length - 1) == ']') {
+          key = key.substring(0, key.length - 2);
+          var existing = result[key];
+          if (!existing) {
+            existing = [];
+            result[key] = existing;
+          }
+
+          existing.push(k.val());
+        } else {
+          result[k.attr("name")] = k.val();
+        }
+      }
+    });
+  });
+
+  result.next = location.href;
+
+  return result;
+};
+
+jQuery.fn.selectEmptyFormElement = function() {
+  var empty = null;
+  var _e = this;
+  jQuery.each(["input", "textarea"], function() {
+    if (empty != null) return;
+
+    _e.find(this.toString()).each(function() {
+      if (empty != null) return;
+
+      var _f = $(this);
+      if (-1 == jQuery.inArray(_f.attr("type"), ["submit", "hidden", "checkbox", "radio", "button"])) {
+        if (!_f.val()) {
+          empty = _f;
+        }
+      }
+    });
+  });
+
+  if (empty) {
+    empty.select();
+  }
+
+  return empty != null;
+};
 
 var clickHandlers = {};
 
@@ -71,9 +129,31 @@ $(function() {
 
 
 clickHandlers.create = function(e) {
-  $.getJSON("/create", {}, function(data) {
-    $('#head').after(data.html);
+	var create = $('#create');
+	if (create.length > 0) {
+		$('#create input[type=text]:first').select();
+		return;
+	}
+	
+  $.getJSON("/new", {}, function(data) {
+	  var form = $(data.html);
+    $('#head').after(form);
+    form.find('input[type=text]').select();
+
+		form.find('input[type=submit]').click(function(T) {
+			if (!form.selectEmptyFormElement()) {
+				form.find('input[type=submit]').disable();
+				alert(form.getFormData());
+				$.postJSON('/create', form.getFormData(), function(data) {
+					// todo!!!
+				});
+			}
+		});
   });
+};
+
+clickHandlers.cancelCreate = function(e) {
+	$('#create').remove();
 };
 
 clickHandlers.comment = function(e) {

@@ -1,1 +1,5 @@
-this is a test page
+<div id='notes'>
+{% for entry in entries %}
+{% include "note.html" %}
+{% endfor %}
+</div>

@@ -1,0 +1,12 @@
+<div class='note'>
+  <div class='title'>
+    <span class='name'><a href="#TODO">{{ entry.title|escape }}</a></span><span class='info'><span>&nbsp;&#151;&nbsp;{{ entry.created_at|date }}&nbsp;|&nbsp;</span><span class='tags'>{{ entry.tags|join:", " }}</span></span>
+  </div>
+  <div class='text'>{{ entry.content|escape }}</div>
+  <div class='cw'>
+    <div class='ba'></div>
+    <div class='w clearfix'>
+      <div class='b lg'><a href="#" class="l_expand">1 комментарий</a></div>
+    </div>
+  </div>
+</div>

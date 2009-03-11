@@ -13,7 +13,20 @@ p {
 textarea {
   font-size: 90%;
   padding: 2px 0;
-  color: #555;
+}
+
+input[type=text] {
+  border: 1px solid #737373;
+  font-size: 90%;
+  padding: 2px;
+}
+
+.ar {
+	text-align: right;
+}
+
+.g {
+	color: #777;
 }
 
 .ll a {
@@ -81,6 +94,32 @@ textarea {
 #foot #cp {
   float: right;
   color: #aaa;
+}
+
+/*** CREATE ***/
+
+#create {
+	margin: 2em;
+	padding: 0 1em 1em 1em;
+	background-color: #EFECCA;
+}
+
+#create table {
+	width: 100%;
+}
+
+#create input[type=text] {
+	width: 100%;
+}
+
+#create textarea {
+	width: 100%;
+	height: 200px;
+}
+
+#create .h {
+	padding-top: 1em;
+	color: #666;
 }
 
 /*** NAVIGATION ***/
