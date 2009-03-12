@@ -4,13 +4,13 @@
     <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
     <meta content='Нетематический блог Алексея Пегова' name='description' />
     <meta content='Alexey Pegov, Pegov, Пегов, Алексей Пегов, spleaner, spleanersite' name='keywords' />
-    <title>{{ title }}</title>
+    <title>{{ title|default:"" }}Apathetic Intolerable Freak</title>
     <link href='http://feeds.feedburner.com/spleaner' rel='alternate' title='RSS' type='application/rss+xml' />
     <link href="/css/v2.css" media="all" rel="stylesheet" type="text/css" />
   </head>
   <body>
     <div class='clearfix' id='head'>
-      <h1 id='title'>Dead pixels</h1>
+      <h1 id='title'>Apathetic Intolerable Freak</h1>
       <div id='top' class='ll g'>
         {% if user %}
         {{ user.nickname }}&nbsp;|&nbsp;<a href="{{ url }}">Выйти</a>{% if admin %}&nbsp;|&nbsp;<a href="#" class="l_create">Написать</a>{% endif %}
@@ -18,7 +18,7 @@
         <a href="{{ url }}">Войти</a>
         {% endif %}
       </div>
-      <div id='sub'>apathetic intolerable freak&trade;</div>
+      <div id='sub'>spLeanerSite v3.</div>
     </div>
     <div id='container'>
       {% include view %}

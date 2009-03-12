@@ -1,0 +1,31 @@
+<div id="note-form">
+{%if entry %}
+<input type="hidden" name="note_id" value="{{ entry.key.id }}"/>
+{% endif %}
+<table>
+  <tr>
+    <td class="h" colspan="2"><label for="c_title">Заголовок:</label></td>
+  </tr>
+  <tr>
+    <td><input type="text" name="title" id="c_title" autocomplete="off" value="{{ entry.title|default:"" }}"/></td>
+    <td class="ar">Date</td>
+  </tr>
+  <tr>
+    <td class="h" colspan="2"><label for="c_text">Текст:</label></td>
+  </tr>
+  <tr>
+    <td colspan="2"><textarea name="text" id="c_text">{{ entry.content|default:"" }}</textarea></td>
+  </tr>
+  <tr>
+    <td class="h"  colspan="2"><label for="c_tags">Теги:</label></td>
+  </tr>
+  <tr>
+    <td><input type="text" name="tags" id="c_tags" value="{{ entry.tags|join:", " }}" autocomplete="off"/></td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td class="h"><input type="submit" value="{% if entry %}Сохранить{% else %}Опубликовать{%endif %}"/>&nbsp;<a href="#" class="l_cancelCreate">Отменить</a></td>
+    <td>&nbsp;</td>
+  </tr>
+</table>
+</div>

@@ -30,45 +30,69 @@ class Comment(db.Model):
   content = db.StringProperty()
   created_at = db.DateTimeProperty(auto_now_add=True)
   
-class MainHandler(webapp.RequestHandler):
+class Helpers:
+  """ Just a helper methods """
+  def get_html(self, template_name, _vars = {}):
+    return template.render(os.path.join(os.path.dirname(__file__), '%s.html' % template_name), _vars)
+  
+  def render(self, response, template_name, _vars = {}):
+    response.out.write(self.get_html(template_name, _vars))
+  
+  def render_json(self, response, template_name, _vars = {}):
+    html = self.get_html(template_name, _vars)
+    response.headers['Content-Type'] = 'application/json'
+    simplejson.dump({'html': html}, response.out, ensure_ascii=False)
+    
+  def render_a(self, response, template_name, _vars = {}):
+    user = users.get_current_user()
+    if user:
+      url = users.create_logout_url(self.request.uri)
+    else:
+      url = users.create_login_url(self.request.uri)
+    
+    _tmp = {
+      'admin': users.is_current_user_admin(),
+      'url': url,
+      'user': user
+    }
+    
+    _tmp.update(_vars)
+    self.render(response, template_name, _tmp)
+  
+class MainHandler(webapp.RequestHandler, Helpers):
   """ Handles index page """
   def get(self):
-    try:
-      entries = db.Query(Note).order('-created_at').fetch(limit=7)
-      user = users.get_current_user()
-      if user:
-        url = users.create_logout_url(self.request.uri)
-      else:
-        url = users.create_login_url(self.request.uri)
+    entries = db.Query(Note).order('-created_at').fetch(limit=7)
 
-      template_values = {
-        'title': 'test',
-        'admin': users.is_current_user_admin(),
-        'url': url,
-        'user': user,
-        'view': 'index.html',
-        'entries': entries
-      }
+    template_values = {
+      'view': 'index.html',
+      'entries': entries
+    }
 
-      path = os.path.join(os.path.dirname(__file__), 'layout.html')
-      self.response.out.write(template.render(path, template_values))
-    except:
-      logging.error('Unable to get notes from the datastore')
+    self.render_a(self.response, 'layout', template_values)
 
-class NewHandler(webapp.RequestHandler):
+class NewHandler(webapp.RequestHandler, Helpers):
   """ Will send a create form """
   def get(self):
-    html = template.render(os.path.join(os.path.dirname(__file__), 'create.html'), {})
-    self.response.headers['Content-Type'] = 'application/json'
-    simplejson.dump({'html': html}, self.response.out, ensure_ascii=False)
+    self.render_json(self.response, 'note-form')
 
-class CreateHandler(webapp.RequestHandler):
+class CreateHandler(webapp.RequestHandler, Helpers):
   """ Will create a new post """
   def post(self):
     logging.debug('Creating a new post...')
     if users.is_current_user_admin():
-      note = Note()
-      note.author = users.get_current_user()
+      note_id = self.request.get('note_id')
+      if note_id:
+        try:
+          _id = int(note_id)
+        except ValueError:
+          logging.error('Unable to parse note id: %i' % _id)
+        
+        note = Note.get_by_id(_id)
+      else:
+        note = Note()
+        note.author = users.get_current_user()
+      
       note.title = self.request.get('title')
       note.content = self.request.get('text')
       
@@ -77,21 +101,43 @@ class CreateHandler(webapp.RequestHandler):
       try: tags.remove('')
       except: pass
       
+      # TODO: remove unused tags?
       note.tags = map(db.Category, tags)
-      note.put()
       
+      note.put()
       logging.debug('Post created')
+      
+      template_vars = {
+        'entry': note, 
+        'admin': users.is_current_user_admin()
+      }
+      
+      self.render_json(self.response, 'note', template_vars)
     else:
       logging.debug('Unable to create a post: user is not an admin')
       self.error(403)
 
-class EditHandler(webapp.RequestHandler):
+class EditHandler(webapp.RequestHandler, Helpers):
   """ Edit note """
   def post(self):
+    if users.is_current_user_admin():
+      note_id = self.request.get('note_id')
+      
+      try:
+        _id = int(note_id)
+      except ValueError:
+        logging.debug('Unable to parse note id: %i' % _id)
+
+      note = Note.get_by_id(_id)
+      if note:
+        self.render_json(self.response, 'note-form', {'entry': note})
+      else:
+        logger.error('Unable to find note to edit: %s' % note_id)
+    else:
+      logger.error('Non-admin users can not edit notes!')
     logging.debug('Edit handler')
 
-
-class RemoveHandler(webapp.RequestHandler):
+class DeleteHandler(webapp.RequestHandler):
   """ Remove note & comments """
   def post(self):
     logging.debug('Remove handler')
@@ -123,7 +169,7 @@ class CommentHandler(webapp.RequestHandler):
     else:
       logging.debug('User should be logged in to be able to post comments!')
 
-class FetchCommentsHandler(webapp.RequestHandler):
+class FetchCommentsHandler(webapp.RequestHandler, Helpers):
   """ Will return comments for the given note """
   def post(self):
     note_id = self.request.get('note_id')
@@ -139,14 +185,12 @@ class FetchCommentsHandler(webapp.RequestHandler):
         'comments': note.comments
       }
         
-      html = template.render(os.path.join(os.path.dirname(__file__), 'comments.html'), template_vars)
-      self.response.headers['Content-Type'] = 'application/json'
-      simplejson.dump({'html': html}, self.response.out, ensure_ascii=False)
+      self.render_json(self.response, 'comments', template_vars)
     else:
       logging.debug('Unable to get note for id: %i' % _id)
   
 
-class NoteHandler(webapp.RequestHandler):
+class NoteHandler(webapp.RequestHandler, Helpers):
   """ Will show a certain note """
   def get(self, note_id):
     logging.debug('Show note id: %s' % note_id)
@@ -156,23 +200,13 @@ class NoteHandler(webapp.RequestHandler):
       note = Note.get_by_id(_id)
 
       if note:
-        user = users.get_current_user()
-        if user:
-          url = users.create_logout_url(self.request.uri)
-        else:
-          url = users.create_login_url(self.request.uri)
-
         template_values = {
-          'title': 'test',
-          'admin': users.is_current_user_admin(),
-          'url': url,
-          'user': user,
+          'title': '%s - ' % note.title,
           'view': 'full.html',
           'entry': note
         }
 
-        path = os.path.join(os.path.dirname(__file__), 'layout.html')
-        self.response.out.write(template.render(path, template_values))
+        self.render_a(self.response, 'layout', template_values)
       else:
         self.error(404)
       
@@ -189,7 +223,9 @@ def main():
     ('/create', CreateHandler),
     ('/add-comment', CommentHandler),
     ('/fetch-comments', FetchCommentsHandler),
-    (r'/note/([0-9]+)-.*', NoteHandler)
+    (r'/note/([0-9]+)-.*', NoteHandler),
+    ('/edit', EditHandler),
+    ('/delete', DeleteHandler)
     ], debug=True)
   wsgiref.handlers.CGIHandler().run(application)
 

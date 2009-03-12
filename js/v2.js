@@ -129,9 +129,9 @@ $(function() {
 
 
 clickHandlers.create = function(e) {
-  var create = $('#create');
+  var create = $('#note-form');
   if (create.length > 0) {
-    $('#create input[type=text]:first').select();
+    $('#note-form input[type=text]:first').select();
     return;
   }
   
@@ -144,7 +144,8 @@ clickHandlers.create = function(e) {
       if (!form.selectEmptyFormElement()) {
         form.find('input[type=submit]').disable();
         $.postJSON('/create', form.getFormData(), function(data) {
-          // todo!!!
+          $('#note-form').remove();
+          $('#notes').prepend(data.html);
         });
       }
     });
@@ -152,7 +153,8 @@ clickHandlers.create = function(e) {
 };
 
 clickHandlers.cancelCreate = function(e) {
-  $('#create').remove();
+  $('#note-form').remove();
+  $('.note').show();
 };
 
 clickHandlers.remove = function(e) {
@@ -160,7 +162,25 @@ clickHandlers.remove = function(e) {
 };
 
 clickHandlers.edit = function(e) {
-  alert('EDIT');
+  var P = e.parents(".note");
+  if (!P) return;
+  var id = P.find('input[type=hidden]').attr('value');
+  if (!id) return;
+  
+  $.postJSON("/edit", {'note_id': id}, function(data) {
+    P.hide();
+    var form = $(data.html);
+    P.after(form);
+    
+    form.find('input[type=submit]').click(function(T) {
+      if (!form.selectEmptyFormElement()) {
+        form.find('input[type=submit]').disable();
+        $.postJSON('/create', form.getFormData(), function(data) {
+          alert('UPDATED!');
+        });
+      }
+    });
+  });
 };
 
 clickHandlers.comment = function(e) {
