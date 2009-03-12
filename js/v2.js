@@ -129,44 +129,52 @@ $(function() {
 
 
 clickHandlers.create = function(e) {
-	var create = $('#create');
-	if (create.length > 0) {
-		$('#create input[type=text]:first').select();
-		return;
-	}
-	
+  var create = $('#create');
+  if (create.length > 0) {
+    $('#create input[type=text]:first').select();
+    return;
+  }
+  
   $.getJSON("/new", {}, function(data) {
-	  var form = $(data.html);
+    var form = $(data.html);
     $('#head').after(form);
     form.find('input[type=text]').select();
 
-		form.find('input[type=submit]').click(function(T) {
-			if (!form.selectEmptyFormElement()) {
-				form.find('input[type=submit]').disable();
-				$.postJSON('/create', form.getFormData(), function(data) {
-					// todo!!!
-				});
-			}
-		});
+    form.find('input[type=submit]').click(function(T) {
+      if (!form.selectEmptyFormElement()) {
+        form.find('input[type=submit]').disable();
+        $.postJSON('/create', form.getFormData(), function(data) {
+          // todo!!!
+        });
+      }
+    });
   });
 };
 
 clickHandlers.cancelCreate = function(e) {
-	$('#create').remove();
+  $('#create').remove();
+};
+
+clickHandlers.remove = function(e) {
+  alert('REMOVE');
+};
+
+clickHandlers.edit = function(e) {
+  alert('EDIT');
 };
 
 clickHandlers.comment = function(e) {
-	var wrapper = $('#new-comment-wrapper');
+  var wrapper = $('#new-comment-wrapper');
 
   var N = e.parents(".note");
   var cw = N.find(".cw");
   if (cw.length) {
     cw.hide();
-		var t = $('<div class="cwl"><div class="ba"></div><div class="cs"><div class="c commentform"></div></div></div>');
+    var t = $('<div class="cwl"><div class="ba"></div><div class="cs"><div class="c commentform"></div></div></div>');
     t.find('.commentform').append(wrapper.html());
-		
-		cw.after(t);
-	} else {
+    
+    cw.after(t);
+  } else {
     var cwl = N.find(".cwl");
     if (cwl.length) {
       var pl = cwl.find(".add");
@@ -178,12 +186,12 @@ clickHandlers.comment = function(e) {
 
   N.find("input[type=submit]").click(function(E) {
       var note = $(E.target).parents(".note");
-			if (!note.selectEmptyFormElement()) {
-				note.find("input[type=submit]").disable();
-				$.postJSON('/add-comment', note.getFormData(), function(data) {
-					// todo!!!
-				});
-			}
+      if (!note.selectEmptyFormElement()) {
+        note.find("input[type=submit]").disable();
+        $.postJSON('/add-comment', note.getFormData(), function(data) {
+          // todo!!!
+        });
+      }
     });
 
   N.find("textarea").makeExpandable(512, function() {}).focus().keypress();

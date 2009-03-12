@@ -85,6 +85,17 @@ class CreateHandler(webapp.RequestHandler):
       logging.debug('Unable to create a post: user is not an admin')
       self.error(403)
 
+class EditHandler(webapp.RequestHandler):
+  """ Edit note """
+  def post(self):
+    logging.debug('Edit handler')
+
+
+class RemoveHandler(webapp.RequestHandler):
+  """ Remove note & comments """
+  def post(self):
+    logging.debug('Remove handler')
+
 class CommentHandler(webapp.RequestHandler):
   """ Will add a comment """
   def post(self):
