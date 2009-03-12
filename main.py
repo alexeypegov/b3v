@@ -18,7 +18,6 @@ class Note(db.Model):
   title = db.StringProperty()
   content = db.TextProperty()
   tags = db.ListProperty(db.Category)
-  draft = db.BooleanProperty(default=True)
   created_at = db.DateTimeProperty(auto_now_add=True)
   
   def encode_name(self):
@@ -72,8 +71,6 @@ class CreateHandler(webapp.RequestHandler):
       note.author = users.get_current_user()
       note.title = self.request.get('title')
       note.content = self.request.get('text')
-      
-      # TODO: draft!
       
       tags = map(string.strip, self.request.get('tags').split(','))
       # tags = map(string.lowercase, tags)
