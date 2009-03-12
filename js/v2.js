@@ -176,7 +176,10 @@ clickHandlers.edit = function(e) {
       if (!form.selectEmptyFormElement()) {
         form.find('input[type=submit]').disable();
         $.postJSON('/create', form.getFormData(), function(data) {
-          alert('UPDATED!');
+          P.remove();
+          result = $(data.html)
+          form.replaceWith(result);
+          result.effect("highlight", {'color' : '#EFECCA'}, 1000);
         });
       }
     });
@@ -192,14 +195,14 @@ clickHandlers.comment = function(e) {
     cw.hide();
     var t = $('<div class="cwl"><div class="ba"></div><div class="cs"><div class="c commentform"></div></div></div>');
     t.find('.commentform').append(wrapper.html());
-    
     cw.after(t);
   } else {
     var cwl = N.find(".cwl");
     if (cwl.length) {
       var pl = cwl.find(".add");
       if (pl.length) {
-        pl.replaceWith('<div class="c commentform">%(form)</div>'.replace('%(form)', wrapper));
+        pl.hide();
+        pl.before('<div class="c commentform">%(form)</div>'.replace('%(form)', wrapper.html()));
       }
     }
   }
@@ -209,7 +212,16 @@ clickHandlers.comment = function(e) {
       if (!note.selectEmptyFormElement()) {
         note.find("input[type=submit]").disable();
         $.postJSON('/add-comment', note.getFormData(), function(data) {
-          // todo!!!
+          var cw = N.find(".cw");
+          if (cw.length) {
+            cw.remove();
+          } 
+          
+          var result = $(data.html);
+          N.find('.commentform').replaceWith(result);
+          result.effect("highlight", {}, 1000);
+          
+          N.find('.add').show();
         });
       }
     });

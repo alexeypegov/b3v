@@ -137,12 +137,12 @@ class EditHandler(webapp.RequestHandler, Helpers):
       logger.error('Non-admin users can not edit notes!')
     logging.debug('Edit handler')
 
-class DeleteHandler(webapp.RequestHandler):
+class DeleteHandler(webapp.RequestHandler, Helpers):
   """ Remove note & comments """
   def post(self):
     logging.debug('Remove handler')
 
-class CommentHandler(webapp.RequestHandler):
+class CommentHandler(webapp.RequestHandler, Helpers):
   """ Will add a comment """
   def post(self):
     logging.debug('Adding a comment...')
@@ -164,6 +164,8 @@ class CommentHandler(webapp.RequestHandler):
         comment.content = self.request.get('comment')
           
         comment.put()
+        
+        self.render_json(self.response, 'comments', {'comments': [comment]})
       else:
         logging.debug('Unable to find a note for id: %s' % note_id)
     else:
