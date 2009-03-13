@@ -3,3 +3,15 @@
 {% include "note.html" %}
 {% endfor %}
 </div>
+<div id="paging">
+{% ifnotequal prev -1 %}
+  {% ifequal prev 0 %}
+    <a href="/">&#171;</a>
+  {% else %}
+    <a href="/{{ prev }}">&#171;</a>
+  {% endifequal %}
+{% endifnotequal %}
+{% ifnotequal next -1 %}
+<a href="/{{ next }}">&#187;</a>
+{% endifnotequal %}
+</div>

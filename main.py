@@ -11,6 +11,7 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext import db
 
+from django.core.paginator import ObjectPaginator, InvalidPage
 from django.utils import simplejson
 
 class Note(db.Model):
@@ -61,12 +62,24 @@ class Helpers:
   
 class MainHandler(webapp.RequestHandler, Helpers):
   """ Handles index page """
-  def get(self):
-    entries = db.Query(Note).order('-created_at').fetch(limit=7)
-
+  def get(self, page = 0):
+    try:
+      page = int(page)
+    except:
+      page = 0
+      
+    entries = db.Query(Note).order('-created_at').fetch(10, page * 10)
+    
+    if db.Query(Note).count() >= (page + 1) * 10 + 1:
+      next = page + 1
+    else:
+      next = -1
+      
     template_values = {
       'view': 'index.html',
-      'entries': entries
+      'entries': entries,
+      'next': next,
+      'prev': page - 1
     }
 
     self.render_a(self.response, 'layout', template_values)
@@ -220,12 +233,12 @@ def main():
   logging.getLogger().setLevel(logging.DEBUG)
   
   application = webapp.WSGIApplication([
-    ('/', MainHandler),
+    ('/([\d]*)', MainHandler),
     ('/new', NewHandler),
     ('/create', CreateHandler),
     ('/add-comment', CommentHandler),
     ('/fetch-comments', FetchCommentsHandler),
-    (r'/note/([0-9]+)-.*', NoteHandler),
+    (r'/note/([0-9]+)-[^\?/#]+', NoteHandler),
     ('/edit', EditHandler),
     ('/delete', DeleteHandler)
     ], debug=True)
