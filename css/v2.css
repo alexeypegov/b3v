@@ -57,6 +57,18 @@ input[type=text] {
   visibility: hidden;
 }
 
+.btn {
+  
+}
+
+.green-btn {
+  
+}
+
+.gray-btn {
+  
+}
+
 /*** HEADER ***/
 
 #head {
@@ -295,4 +307,8 @@ input[type=text] {
 .commentform input {
   font: 90% "Arial", serif;
   margin-right: 1em;
+}
+
+.c .author {
+  color: #999;
 }

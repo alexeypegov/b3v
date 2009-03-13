@@ -99,7 +99,7 @@ jQuery.fn.selectEmptyFormElement = function() {
   });
 
   if (empty) {
-    empty.select();
+    empty.focus();
   }
 
   return empty != null;
@@ -131,14 +131,14 @@ $(function() {
 clickHandlers.create = function(e) {
   var create = $('#note-form');
   if (create.length > 0) {
-    $('#note-form input[type=text]:first').select();
+    $('#note-form input[type=text]:first').focus();
     return;
   }
   
   $.getJSON("/new", {}, function(data) {
     var form = $(data.html);
     $('#head').after(form);
-    form.find('input[type=text]').select();
+    form.find('input[type=text]:first').focus();
 
     form.find('input[type=submit]').click(function(T) {
       if (!form.selectEmptyFormElement()) {
@@ -171,6 +171,7 @@ clickHandlers.edit = function(e) {
     P.hide();
     var form = $(data.html);
     P.after(form);
+    form.find('textarea').focus();
     
     form.find('input[type=submit]').click(function(T) {
       if (!form.selectEmptyFormElement()) {
