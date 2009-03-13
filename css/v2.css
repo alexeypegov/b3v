@@ -3,7 +3,7 @@ body, p, form {
 }
 
 body {
-  font: 100%/1.25 "Times", serif;
+  font: 100%/1.25 arial, serif;
 }
 
 p {
@@ -11,13 +11,13 @@ p {
 }
 
 textarea {
-  font-size: 90%;
+  font-size: 100%;
   padding: 2px 0;
 }
 
 input[type=text] {
   border: 1px solid #737373;
-  font-size: 90%;
+  font-size: 100%;
   padding: 2px;
 }
 
@@ -71,10 +71,14 @@ input[type=text] {
 }
 
 #head #top {
+  padding-top: 0.3em;
   float: right;
+  font-size: 90%;
 }
 
 #head #sub {
+  padding-top: 0.3em;
+  font-size: 90%;
   color: #777;
 }
 
