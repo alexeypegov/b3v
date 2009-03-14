@@ -9,22 +9,23 @@
     <link href="/css/v2.css" media="all" rel="stylesheet" type="text/css" />
   </head>
   <body>
+    <div id="user" class="ll g">
+      {% if user %}
+      {{ user.nickname }}&nbsp;|&nbsp;<a href="{{ url }}">Выйти</a>{% if admin %}&nbsp;|&nbsp;<a href="#" class="l_create">Написать</a>{% endif %}
+      {% else %}
+        <a href="{{ url }}">Войти</a>
+      {% endif %}
+    </div>
     <div class='clearfix' id='head'>
       <h1 id='title'>Наука сна</h1>
-      <div id='top' class='ll g'>
-        {% if user %}
-        {{ user.nickname }}&nbsp;|&nbsp;<a href="{{ url }}">Выйти</a>{% if admin %}&nbsp;|&nbsp;<a href="#" class="l_create">Написать</a>{% endif %}
-        {% else %}
-        <a href="{{ url }}">Войти</a>
-        {% endif %}
-      </div>
-      <div id='sub'>spLeanerSite v3.0 Beta</div>
+      <div id='top' class='ll g'><a href="/faq">FAQ</a></div>
+      <div id='sub'>&nbsp;</div>
     </div>
     <div id='container'>
       {% include view %}
     </div>
     <div class='ll clearfix' id='foot'>
-      <div id='cp'>&copy; Алексей Пегов, 2008&#150;2009</div>
+      <div id='cp'>&copy; <a href="mailto:spleaner@gmail.com">Алексей Пегов</a>, 2008&#150;2009 (<a href="http://creativecommons.org/licenses/by-sa/3.0/us/">CC</a>)</div>
       <div>
         Еще:
         <a href='http://spleaner.tumblr.com'>Tumblr</a>

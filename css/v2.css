@@ -57,10 +57,18 @@ input[type=text] {
   visibility: hidden;
 }
 
+/*** USER ***/
+
+#user {
+  margin: 0.3em 2em 0 2em;
+  text-align: right;
+  font-size: 87.5%;
+}
+
 /*** HEADER ***/
 
 #head {
-  margin: 2em;
+  margin: 0 2em 2em 2em;
 }
 
 #head #title {
@@ -83,8 +91,7 @@ input[type=text] {
 }
 
 #container {
-  margin: 1em 2em;
-  margin-bottom: 5em;
+  margin: 1em 2em 3em 2em;
 }
 
 #foot {
@@ -133,7 +140,7 @@ input[type=text] {
 /*** NAVIGATION ***/
 
 #container #nav {
-  margin: 1em 0;
+  margin: -2em 0 1em 0;
 }
 
 /*** AUTH ***/
