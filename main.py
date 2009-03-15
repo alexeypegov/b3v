@@ -22,6 +22,7 @@ class Note(db.Model):
   title = db.StringProperty()
   content = db.TextProperty()
   tags = db.ListProperty(db.Category)
+  uuid = db.StringProperty()
   created_at = db.DateTimeProperty(auto_now_add=True)
   updated_at = db.DateTimeProperty(auto_now=True)
   
@@ -29,9 +30,9 @@ class Note(db.Model):
     # todo: !?&, etc!
     return u'%i-%s' % (self.key().id(), re.sub('\s+', '-', self.title.lower()))
 
-  def uuid(self):
-    return str(uuid.uuid4())
-    
+  def w3cdtf(self):
+    return self.created_at.strftime("%Y-%m-%dT%H:%M:%SZ")
+
   @classmethod
   def count(cls):
     return db.Query(Note).count()
@@ -132,6 +133,7 @@ class CreateHandler(webapp.RequestHandler, Helpers):
         note = Note.get_by_id(_id)
       else:
         note = Note()
+        note.uuid = str(uuid.uuid4())
         note.author = users.get_current_user()
       
       note.title = self.request.get('title')
@@ -263,7 +265,10 @@ class FeedHandler(webapp.RequestHandler, Helpers):
   """ Will generate a RSS feed """
   def get(self):
     self.response.headers['Content-Type'] = 'application/atom+xml'
-    self.render(self.response, 'atom', {'entries': Note.get_recent()}, ext = 'xml')
+    recent = Note.get_recent()
+    if len(recent):
+      updated = recent[0].w3cdtf()
+    self.render(self.response, 'atom', {'entries': recent, 'updated': updated}, ext = 'xml')
     
     
 def main():

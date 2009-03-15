@@ -10,8 +10,8 @@
   </div>
   <div class='text'>{{ entry.content|escape }}</div>
   {% block comments %}
-  <div class='cwl'>
     {% if entry.comments.count %}
+    <div class='cwl'>
     <div class='ba'></div>
     <div class="cs">
     {% for comment in entry.comments %}
@@ -19,10 +19,13 @@
     {% endfor %}
     <div class="c add ll"><a href="#" class="l_comment">Добавить комментарий</a></div>
     </div>
+    </div>
     {% else %}
+    <div class='cw'>
     <div class='ga'></div>
     <div class='w clearfix'>
       <div class='g lg'><a href="#" class="l_comment">Добавить комментарий</a></div>
+    </div>
     </div>
     {% endif %}
   </div>

@@ -3,21 +3,23 @@
  
  <title>Наука Сна</title>
  <subtitle>Нетематический блог Алексея Пегова</subtitle>
- <link href="http://example.org/feed/" rel="self"/>
- <link href="http://example.org/"/>
- <updated>2003-12-13T18:30:02Z</updated>
+ <link href="http://feeds2.feedburner.com/spleaner" rel="self"/>
+ <link href="http://spleaner.appspot.com/"/>
+ 
+ {% if entries %}<updated>{{ updated }}</updated>{% else %}<updated>2008-12-12T18:30:00Z</updated>{% endif %}
+ 
  <author>
    <name>Алексей Пегов</name>
    <email>spleaner@gmail.com</email>
  </author>
- <id>urn:uuid:60a76c80-d399-11d9-b91C-0003939e0af6</id>
+ <id>urn:uuid:e6dd03b8-d0af-442a-97ca-826c0eb74fd7</id>
  
  {% for entry in entries %}
  <entry>
    <title>{{ entry.title }}</title>
-   <link href="http://example.org/2003/12/13/atom03"/>
+   <link href="{{ entry.url }}"/>
    <id>urn:uuid:{{ entry.uuid }}</id>
-   <updated>2003-12-13T18:30:02Z</updated>
+   <updated>{{ entry.w3cdtf }}</updated>
    <summary>{{ entry.content }}</summary>
  </entry>
  {% endfor %}
