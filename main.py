@@ -5,6 +5,7 @@ import wsgiref.handlers
 import re
 import string
 import logging
+import uuid
 
 from google.appengine.api import users
 from google.appengine.ext import webapp
@@ -14,16 +15,50 @@ from google.appengine.ext import db
 from django.core.paginator import ObjectPaginator, InvalidPage
 from django.utils import simplejson
 
+TEMPLATES_PATH = 'view'
+
 class Note(db.Model):
   author = db.UserProperty()
   title = db.StringProperty()
   content = db.TextProperty()
   tags = db.ListProperty(db.Category)
   created_at = db.DateTimeProperty(auto_now_add=True)
+  updated_at = db.DateTimeProperty(auto_now=True)
   
   def encode_name(self):
     # todo: !?&, etc!
     return u'%i-%s' % (self.key().id(), re.sub('\s+', '-', self.title.lower()))
+
+  def uuid(self):
+    return str(uuid.uuid4())
+    
+  @classmethod
+  def count(cls):
+    return db.Query(Note).count()
+    
+  @classmethod
+  def get_page(cls, page = 0):
+    return db.Query(Note).order('-created_at').fetch(10, page * 10)
+    
+  @classmethod
+  def get_recent(cls, count = 10):
+    return db.Query(Note).order('-created_at').fetch(10)
+    
+  @classmethod
+  def next_page(cls, page = 0):
+    if Note.count() >= (page + 1) * 10 + 1:
+      return page + 1
+    else:
+      return -1
+      
+  @classmethod
+  def get_comments(cls, id):
+    note = Note.get_by_id(id)
+    if not note:
+      return []
+    else:
+      return note.comments
+
 
 class Comment(db.Model):
   note = db.ReferenceProperty(Note, collection_name='comments')
@@ -33,11 +68,11 @@ class Comment(db.Model):
   
 class Helpers:
   """ Just a helper methods """
-  def get_html(self, template_name, _vars = {}):
-    return template.render(os.path.join(os.path.dirname(__file__), '%s.html' % template_name), _vars)
+  def get_html(self, template_name, _vars = {}, ext = 'html'):
+    return template.render(os.path.join(os.path.dirname(__file__), TEMPLATES_PATH, '%s.%s' % (template_name, ext)), _vars)
   
-  def render(self, response, template_name, _vars = {}):
-    response.out.write(self.get_html(template_name, _vars))
+  def render(self, response, template_name, _vars = {}, ext = 'html'):
+    response.out.write(self.get_html(template_name, _vars, ext))
   
   def render_json(self, response, template_name, _vars = {}):
     html = self.get_html(template_name, _vars)
@@ -68,17 +103,10 @@ class MainHandler(webapp.RequestHandler, Helpers):
     except:
       page = 0
       
-    entries = db.Query(Note).order('-created_at').fetch(10, page * 10)
-    
-    if db.Query(Note).count() >= (page + 1) * 10 + 1:
-      next = page + 1
-    else:
-      next = -1
-      
     template_values = {
       'view': 'index.html',
-      'entries': entries,
-      'next': next,
+      'entries': Note.get_page(page),
+      'next': Note.next_page(page),
       'prev': page - 1
     }
 
@@ -140,15 +168,17 @@ class EditHandler(webapp.RequestHandler, Helpers):
         _id = int(note_id)
       except ValueError:
         logging.debug('Unable to parse note id: %i' % _id)
+        self.error(404)
+        return
 
       note = Note.get_by_id(_id)
-      if note:
-        self.render_json(self.response, 'note-form', {'entry': note})
-      else:
-        logger.error('Unable to find note to edit: %s' % note_id)
+      if not note:
+        self.error(404)
+        return
+        
+      self.render_json(self.response, 'note-form', {'entry': note})
     else:
       logger.error('Non-admin users can not edit notes!')
-    logging.debug('Edit handler')
 
 class DeleteHandler(webapp.RequestHandler, Helpers):
   """ Remove note & comments """
@@ -193,16 +223,14 @@ class FetchCommentsHandler(webapp.RequestHandler, Helpers):
       _id = int(note_id)
     except ValueError:
       logging.debug('Unable to parse note id: %s' % note_id)
+      self.error(404)
+      return
 
-    note = Note.get_by_id(_id)
-    if note:
-      template_vars = {
-        'comments': note.comments
-      }
-        
-      self.render_json(self.response, 'comments', template_vars)
-    else:
-      logging.debug('Unable to get note for id: %i' % _id)
+    template_vars = {
+      'comments': Note.get_comments(_id)
+    }
+      
+    self.render_json(self.response, 'comments', template_vars)
   
 
 class NoteHandler(webapp.RequestHandler, Helpers):
@@ -212,22 +240,32 @@ class NoteHandler(webapp.RequestHandler, Helpers):
     
     try:
       _id = int(note_id)
-      note = Note.get_by_id(_id)
-
-      if note:
-        template_values = {
-          'title': '%s - ' % note.title,
-          'view': 'full.html',
-          'entry': note
-        }
-
-        self.render_a(self.response, 'layout', template_values)
-      else:
-        self.error(404)
-      
     except ValueError:
       self.error(404)
+      return
+      
+      
+    note = Note.get_by_id(_id)
 
+    if not note:
+      self.error(404)
+      return
+
+    template_values = {
+      'title': '%s - ' % note.title,
+      'view': 'full.html',
+      'entry': note
+    }
+
+    self.render_a(self.response, 'layout', template_values)
+
+class FeedHandler(webapp.RequestHandler, Helpers):
+  """ Will generate a RSS feed """
+  def get(self):
+    self.response.headers['Content-Type'] = 'application/atom+xml'
+    self.render(self.response, 'atom', {'entries': Note.get_recent()}, ext = 'xml')
+    
+    
 def main():
   # set logging level
   logging.getLogger().setLevel(logging.DEBUG)
@@ -240,7 +278,8 @@ def main():
     ('/fetch-comments', FetchCommentsHandler),
     (r'/note/([0-9]+)-[^\?/#]+', NoteHandler),
     ('/edit', EditHandler),
-    ('/delete', DeleteHandler)
+    ('/delete', DeleteHandler),
+    ('/feed', FeedHandler)
     ], debug=True)
   wsgiref.handlers.CGIHandler().run(application)
 

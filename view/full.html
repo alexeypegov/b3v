@@ -1,3 +1,7 @@
+{% block full %}
+<div id='notes'>
+<div id='nav' class="ll"><a href="/">&larr; Назад</a></div>
+{% endblock %}
 <div class='note'>
   <input type="hidden" name="note_id" value="{{ entry.key.id }}"/>
   <div class='title'>
@@ -5,11 +9,15 @@
     <span class='tags'>{{ entry.tags|join:", " }}</span>{% if admin %} [ <a href="#" class="l_edit">редактировать</a>, <a href="#" class="l_remove">удалить</a> ]{% endif %}</span>
   </div>
   <div class='text'>{{ entry.content|escape }}</div>
-  <div class='cw'>
+  {% block comments %}
+  <div class='cwl'>
     {% if entry.comments.count %}
     <div class='ba'></div>
-    <div class='w clearfix'>
-      <div class='b lg'><a href="#" class="l_expand">{{ entry.comments.count }} комментарий</a></div>
+    <div class="cs">
+    {% for comment in entry.comments %}
+    <div class="c"><span>{{ comment.content }}</span><span class="author ll">&nbsp;&#151;&nbsp;{{ comment.author.nickname }}</span></div>
+    {% endfor %}
+    <div class="c add ll"><a href="#" class="l_comment">Добавить комментарий</a></div>
     </div>
     {% else %}
     <div class='ga'></div>
@@ -18,4 +26,8 @@
     </div>
     {% endif %}
   </div>
+  {% endblock %}
 </div>
+{% block endfull %}
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "full.html" %}
+
+{% block full %}{% endblock %}
+{% block endfull %}{% endblock %}
+
+{% block comments %}
+<div class='cw'>
+  {% if entry.comments.count %}
+  <div class='ba'></div>
+  <div class='w clearfix'>
+    <div class='b lg'><a href="#" class="l_expand">{{ entry.comments.count }} комментарий</a></div>
+  </div>
+  {% else %}
+  {% block add_comment %}
+  <div class='ga'></div>
+  <div class='w clearfix'>
+    <div class='g lg'><a href="#" class="l_comment">Добавить комментарий</a></div>
+  </div>
+  {% endblock %}
+  {% endif %}
+</div>
+{% endblock %}
