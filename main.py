@@ -1,21 +1,25 @@
 #!/usr/bin/env python
 
 import os
-import wsgiref.handlers
 import re
+import uuid
 import string
 import logging
-import uuid
+import wsgiref.handlers
 
+from google.appengine.ext import db
 from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
-from google.appengine.ext import db
 
-from django.core.paginator import ObjectPaginator, InvalidPage
 from django.utils import simplejson
+from django.core.paginator import ObjectPaginator, InvalidPage
 
 TEMPLATES_PATH = 'view'
+NOTE_URL_PREFIX = '/note/'
+
+SLUGIFY_P = re.compile(r"[^\w\s-]", re.UNICODE)
+SLUGIFY_P2 = re.compile('\s+')
 
 class Note(db.Model):
   author = db.UserProperty()
@@ -26,13 +30,15 @@ class Note(db.Model):
   created_at = db.DateTimeProperty(auto_now_add=True)
   updated_at = db.DateTimeProperty(auto_now=True)
   
-  def encode_name(self):
-    # todo: !?&, etc!
-    return u'%i-%s' % (self.key().id(), re.sub('\s+', '-', self.title.lower()))
+  def slug(self):
+    slug = SLUGIFY_P.sub('', self.title.lower())
+    slug = SLUGIFY_P2.sub('-', slug)
+    
+    return u'%i-%s' % (self.key().id(), slug)
 
   def w3cdtf(self):
     return self.created_at.strftime("%Y-%m-%dT%H:%M:%SZ")
-
+    
   @classmethod
   def count(cls):
     return db.Query(Note).count()
@@ -64,7 +70,7 @@ class Note(db.Model):
 class Comment(db.Model):
   note = db.ReferenceProperty(Note, collection_name='comments')
   author = db.UserProperty()
-  content = db.StringProperty()
+  content = db.TextProperty()
   created_at = db.DateTimeProperty(auto_now_add=True)
   
 class Helpers:
@@ -90,7 +96,8 @@ class Helpers:
     _tmp = {
       'admin': users.is_current_user_admin(),
       'url': url,
-      'user': user
+      'user': user,
+      'total_notes': Note.count()
     }
     
     _tmp.update(_vars)
@@ -250,7 +257,9 @@ class NoteHandler(webapp.RequestHandler, Helpers):
     note = Note.get_by_id(_id)
 
     if not note:
+      logging.debug('Note with id: %s was not found' % note_id)
       self.error(404)
+      self.response.out.write('shit')
       return
 
     template_values = {
@@ -268,7 +277,14 @@ class FeedHandler(webapp.RequestHandler, Helpers):
     recent = Note.get_recent()
     if len(recent):
       updated = recent[0].w3cdtf()
-    self.render(self.response, 'atom', {'entries': recent, 'updated': updated}, ext = 'xml')
+    
+    url_prefix = 'http://' + self.request.environ['SERVER_NAME']
+    port = self.request.environ['SERVER_PORT']
+    if port:
+        url_prefix += ':%s' % port
+    url_prefix += NOTE_URL_PREFIX
+    
+    self.render(self.response, 'atom', {'entries': recent, 'updated': updated, 'prefix': url_prefix}, ext = 'xml')
     
     
 def main():
