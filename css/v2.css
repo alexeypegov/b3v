@@ -21,6 +21,14 @@ input[type=text] {
   padding: 2px;
 }
 
+.lf {
+  font-size: 130%;
+}
+
+h2.lf {
+  font-weight: normal;
+}
+
 .ar {
   text-align: right;
 }
@@ -141,48 +149,6 @@ input[type=text] {
 
 #container #nav {
   margin: -1em 0 1em 0;
-}
-
-/*** AUTH ***/
-
-.auth {
-  margin: 0.5em 0;
-}
-
-.auth .head {
-  margin-bottom: 5px;
-}
-
-.auth .form {
-}
-
-.auth .form input {
-  border: 1px solid #737373;
-  font-size: 90%;
-  padding: 2px;
-  color: #555;
-}
-
-.auth .form .uname {
-  margin-left: 5px;
-  width: 20em;
-}
-
-.auth .help {
-}
-
-.auth .form .openid {
-  background: #fff url('/images/openid.gif') 2px 50% no-repeat;
-  padding-left: 20px;
-}
-
-.auth .form .lj {
-  background: #fff url('/images/lj.gif') 2px 50% no-repeat;
-  padding-left: 20px;
-}
-
-.auth .form .other {
-  padding-right: 20px;
 }
 
 /*** NOTES ***/
@@ -307,4 +273,10 @@ input[type=text] {
 
 .c .author {
   color: #999;
+}
+
+/*** STATIC ***/
+
+#static li {
+  margin-top: 2em;
 }

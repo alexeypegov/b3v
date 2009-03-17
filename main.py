@@ -15,6 +15,7 @@ from google.appengine.ext.webapp import template
 from django.utils import simplejson
 from django.core.paginator import ObjectPaginator, InvalidPage
 
+IPP = 10
 TEMPLATES_PATH = 'view'
 NOTE_URL_PREFIX = '/note/'
 
@@ -45,7 +46,9 @@ class Note(db.Model):
     
   @classmethod
   def get_page(cls, page = 0):
-    return db.Query(Note).order('-created_at').fetch(10, page * 10)
+    if Note.count() > page * IPP:
+      return db.Query(Note).order('-created_at').fetch(10, page * IPP)
+    return None
     
   @classmethod
   def get_recent(cls, count = 10):
@@ -56,7 +59,7 @@ class Note(db.Model):
     if Note.count() >= (page + 1) * 10 + 1:
       return page + 1
     else:
-      return -1
+      return None
       
   @classmethod
   def get_comments(cls, id):
@@ -80,15 +83,16 @@ class Helpers:
   
   def render(self, response, template_name, _vars = {}, ext = 'html'):
     response.out.write(self.get_html(template_name, _vars, ext))
+
+  def render_simple_json(self, response, _vars = {}):
+    response.headers['Content-Type'] = 'application/json'
+    simplejson.dump(_vars, response.out, ensure_ascii=False)
   
   def render_json(self, response, template_name, _vars = {}, _json_vars = {}):
     html = self.get_html(template_name, _vars)
-    response.headers['Content-Type'] = 'application/json'
-    
     _tmp = { 'html' : html }
     _tmp.update(_json_vars)
-    
-    simplejson.dump(_tmp, response.out, ensure_ascii=False)
+    self.render_simple_json(response, _tmp)
     
   def render_a(self, response, template_name, _vars = {}):
     user = users.get_current_user()
@@ -112,14 +116,15 @@ class MainHandler(webapp.RequestHandler, Helpers):
   def get(self, page = 0):
     try:
       page = int(page)
-    except:
+    except ValueError:
       page = 0
       
+    entries = Note.get_page(page)
     template_values = {
       'view': 'index.html',
-      'entries': Note.get_page(page),
+      'entries': entries,
       'next': Note.next_page(page),
-      'prev': page - 1
+      'prev': page - 1 if entries != None else None
     }
 
     self.render_a(self.response, 'layout', template_values)
@@ -127,12 +132,13 @@ class MainHandler(webapp.RequestHandler, Helpers):
 class NewHandler(webapp.RequestHandler, Helpers):
   """ Will send a create form """
   def get(self):
-    self.render_json(self.response, 'note-form')
+    if users.is_current_user_admin():
+      self.render_json(self.response, 'note-form')
 
 class CreateHandler(webapp.RequestHandler, Helpers):
-  """ Will create a new post """
+  """ Will add / update a note """
   def post(self):
-    logging.debug('Creating a new post...')
+    logging.debug('Adding/updating note...')
     if users.is_current_user_admin():
       note_id = self.request.get('note_id')
       if note_id:
@@ -155,7 +161,6 @@ class CreateHandler(webapp.RequestHandler, Helpers):
       try: tags.remove('')
       except: pass
       
-      # TODO: remove unused tags?
       note.tags = map(db.Category, tags)
       
       note.put()
@@ -191,12 +196,33 @@ class EditHandler(webapp.RequestHandler, Helpers):
         
       self.render_json(self.response, 'note-form', {'entry': note})
     else:
-      logger.error('Non-admin users can not edit notes!')
+      logging.error('Non-admin users can not edit notes!')
 
 class DeleteHandler(webapp.RequestHandler, Helpers):
-  """ Remove note & comments """
+  """ Remove note """
   def post(self):
-    logging.debug('Remove handler')
+    status = False
+
+    if users.is_current_user_admin():
+      note_id = self.request.get('note_id')
+      
+      try:
+        _id = int(note_id)
+
+        note = Note.get_by_id(_id)
+        if note:
+          note.delete()
+          status = True
+        else:
+          logging.debug('Unable to find note for id: %i' % _id)
+      except ValueError:
+        logging.debug('Unable to parse note id: %i' % _id)
+        return
+    else:
+      logging.error('Non-admin users can not delete notes!')
+
+    self.render_simple_json(self.response, {'status': status})
+
 
 class CommentHandler(webapp.RequestHandler, Helpers):
   """ Will add a comment """
@@ -290,6 +316,11 @@ class FeedHandler(webapp.RequestHandler, Helpers):
     
     self.render(self.response, 'atom', {'entries': recent, 'updated': updated, 'prefix': url_prefix}, ext = 'xml')
     
+
+class FaqHandler(webapp.RequestHandler, Helpers):
+  """ Will generate FAQ page """
+  def get(self):
+    self.render(self.response, 'layout', {'title': 'faq - ', 'view': 'faq.html'})
     
 def main():
   # set logging level
@@ -304,7 +335,8 @@ def main():
     (r'/note/([0-9]+)-[^\?/#]+', NoteHandler),
     ('/edit', EditHandler),
     ('/delete', DeleteHandler),
-    ('/feed', FeedHandler)
+    ('/feed', FeedHandler),
+    ('/faq', FaqHandler)
     ], debug=True)
   wsgiref.handlers.CGIHandler().run(application)
 

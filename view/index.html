@@ -10,9 +10,9 @@
   {% else %}
     <a href="/{{ prev }}">&#171; Предыдущая страница</a>
   {% endifequal %}
-  {% ifnotequal next -1 %}&nbsp;|&nbsp;{% endifnotequal %}
+  {% if next %}&nbsp;|&nbsp;{% endif %}
 {% endifnotequal %}
-{% ifnotequal next -1 %}
+{% if next %}
 <a href="/{{ next }}">Следующая страница &#187;</a>
-{% endifnotequal %}
+{% endif %}
 </div>

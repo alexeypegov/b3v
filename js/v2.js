@@ -158,7 +158,19 @@ clickHandlers.cancelCreate = function(e) {
 };
 
 clickHandlers.remove = function(e) {
-  alert('REMOVE');
+  if (confirm('Удалить заметку?')) {
+    var P = e.parents(".note");
+    if (!P) return;
+    var id = P.find('input[type=hidden]').attr('value');
+    if (!id) return;
+    $.postJSON("/delete", {'note_id': id}, function(data) {
+      if (data.status) {
+        P.remove();
+      } else {
+        alert('Ошибка удаления!');
+      }
+    });
+  }
 };
 
 clickHandlers.edit = function(e) {
