@@ -81,10 +81,14 @@ class Helpers:
   def render(self, response, template_name, _vars = {}, ext = 'html'):
     response.out.write(self.get_html(template_name, _vars, ext))
   
-  def render_json(self, response, template_name, _vars = {}):
+  def render_json(self, response, template_name, _vars = {}, _json_vars = {}):
     html = self.get_html(template_name, _vars)
     response.headers['Content-Type'] = 'application/json'
-    simplejson.dump({'html': html}, response.out, ensure_ascii=False)
+    
+    _tmp = { 'html' : html }
+    _tmp.update(_json_vars)
+    
+    simplejson.dump(_tmp, response.out, ensure_ascii=False)
     
   def render_a(self, response, template_name, _vars = {}):
     user = users.get_current_user()
@@ -239,7 +243,7 @@ class FetchCommentsHandler(webapp.RequestHandler, Helpers):
       'comments': Note.get_comments(_id)
     }
       
-    self.render_json(self.response, 'comments', template_vars)
+    self.render_json(self.response, 'comments', template_vars, { 'user': users.get_current_user() != None })
   
 
 class NoteHandler(webapp.RequestHandler, Helpers):

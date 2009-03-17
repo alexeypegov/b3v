@@ -17,14 +17,14 @@
     {% for comment in entry.comments %}
     <div class="c"><span>{{ comment.content }}</span><span class="author ll">&nbsp;&#151;&nbsp;{{ comment.author.nickname }}</span></div>
     {% endfor %}
-    <div class="c add ll"><a href="#" class="l_comment">Добавить комментарий</a></div>
+    {% if user %}<div class="c add ll"><a href="#" class="l_comment">Добавить комментарий</a></div>{% endif %}
     </div>
     </div>
     {% else %}
     <div class='cw'>
     <div class='ga'></div>
     <div class='w clearfix'>
-      <div class='g lg'><a href="#" class="l_comment">Добавить комментарий</a></div>
+      <div class='g lg'>{% if user %}<a href="#" class="l_comment">Добавить комментарий</a>{% else %}Нет комментариев{% endif %}</div>
     </div>
     </div>
     {% endif %}

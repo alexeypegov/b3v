@@ -265,6 +265,7 @@ input[type=text] {
 .cw {
   margin-left: 3em;
   font-size: 87.5%;
+  color: #777;
 }
 
 .cw .ga {

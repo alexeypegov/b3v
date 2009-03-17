@@ -14,7 +14,7 @@
   {% block add_comment %}
   <div class='ga'></div>
   <div class='w clearfix'>
-    <div class='g lg'><a href="#" class="l_comment">Добавить комментарий</a></div>
+    <div class='g lg'>{% if user %}<a href="#" class="l_comment">Добавить комментарий</a>{% else %}Нет комментариев{% endif %}</div>
   </div>
   {% endblock %}
   {% endif %}

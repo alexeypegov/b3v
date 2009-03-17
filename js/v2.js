@@ -259,7 +259,9 @@ clickHandlers.expand = function(e) {
       var C = $('<div class="cwl"><div class="ba"></div></div>');
       var CS = $('<div class="cs">%(data)</div>'.replace('%(data)', data.html));
       C.append(CS);
-      CS.append('<div class="c add ll"><a href="#" class="l_comment">Добавить комментарий</a></div>');
+      if (data.user) {
+        CS.append('<div class="c add ll"><a href="#" class="l_comment">Добавить комментарий</a></div>');
+      }
       W.replaceWith(C);
   });
 };
