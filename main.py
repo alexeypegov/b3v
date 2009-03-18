@@ -121,13 +121,12 @@ class MainHandler(webapp.RequestHandler, Helpers):
       
     entries = Note.get_page(page)
     template_values = {
-      'view': 'index.html',
       'entries': entries,
       'next': Note.next_page(page),
       'prev': page - 1 if entries != None else None
     }
 
-    self.render_a(self.response, 'layout', template_values)
+    self.render_a(self.response, 'index', template_values)
 
 class NewHandler(webapp.RequestHandler, Helpers):
   """ Will send a create form """
@@ -292,13 +291,7 @@ class NoteHandler(webapp.RequestHandler, Helpers):
       self.response.out.write('shit')
       return
 
-    template_values = {
-      'title': '%s - ' % note.title,
-      'view': 'full.html',
-      'entry': note
-    }
-
-    self.render_a(self.response, 'layout', template_values)
+    self.render_a(self.response, 'single-note', { 'entry': note })
 
 class FeedHandler(webapp.RequestHandler, Helpers):
   """ Will generate a RSS feed """
@@ -320,7 +313,7 @@ class FeedHandler(webapp.RequestHandler, Helpers):
 class FaqHandler(webapp.RequestHandler, Helpers):
   """ Will generate FAQ page """
   def get(self):
-    self.render(self.response, 'layout', {'title': 'faq - ', 'view': 'faq.html'})
+    self.render(self.response, 'faq')
     
 def main():
   # set logging level

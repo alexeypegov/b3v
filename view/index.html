@@ -1,3 +1,8 @@
+{% extends "layout.html" %}
+
+{% block title %}spLeanerSite{% endblock %}
+
+{% block content %}
 <div id='notes'>
 {% for entry in entries %}
 {% include "note.html" %}
@@ -16,3 +21,4 @@
 <a href="/{{ next }}">Следующая страница &#187;</a>
 {% endif %}
 </div>
+{% endblock %}

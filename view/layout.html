@@ -4,7 +4,7 @@
     <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
     <meta content='spLeanerSite' name='description' />
     <meta content='Alexey Pegov, Pegov, Пегов, Алексей Пегов, spleaner, spleanersite' name='keywords' />
-    <title>{{ title|default:"" }}spLeanerSite</title>
+    <title>{% block title %}spLeanerSite{% endblock %}</title>
     <link href='http://feeds2.feedburner.com/spleaner' rel='alternate' title='RSS' type='application/rss+xml' />
     <link href="/css/v2.css?v=1" media="all" rel="stylesheet" type="text/css" />
   </head>
@@ -22,7 +22,7 @@
       <div id='sub'>Нетематический блог Алексея Пегова</div>
     </div>
     <div id='container'>
-      {% include view %}
+      {% block content %}{% endblock %}
     </div>
     <div class='ll clearfix' id='foot'>
       <div id='cp'>&copy; <a href="mailto:spleaner@gmail.com">Алексей Пегов</a>, 2008&#150;2009 (<a href="http://creativecommons.org/licenses/by-sa/3.0/us/">CC</a>)</div>
