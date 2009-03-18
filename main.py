@@ -6,6 +6,7 @@ import uuid
 import string
 import logging
 import wsgiref.handlers
+import urllib
 
 from google.appengine.ext import db
 from google.appengine.api import users
@@ -19,8 +20,6 @@ IPP = 10
 TEMPLATES_PATH = 'view'
 NOTE_URL_PREFIX = '/note/'
 
-SLUGIFY_P = re.compile(r"[^\w\s-]", re.UNICODE)
-SLUGIFY_P2 = re.compile('\s+')
 
 class Note(db.Model):
   author = db.UserProperty()
@@ -28,17 +27,21 @@ class Note(db.Model):
   content = db.TextProperty()
   tags = db.ListProperty(db.Category)
   uuid = db.StringProperty()
+  slug = db.StringProperty()
   created_at = db.DateTimeProperty(auto_now_add=True)
   updated_at = db.DateTimeProperty(auto_now=True)
   
-  def slug(self):
-    slug = SLUGIFY_P.sub('', self.title.lower())
-    slug = SLUGIFY_P2.sub('-', slug)
-    
-    return u'%i-%s' % (self.key().id(), slug)
-
+  def encoded_slug(self):
+    return urllib.quote(self.slug.encode('utf-8'))
+  
   def w3cdtf(self):
     return self.created_at.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+  @classmethod
+  def get_by_slug(cls, slug):
+    decoded_slug = urllib.unquote(slug).decode('utf8')
+    logging.debug('Decoded slug: %s' % decoded_slug)
+    return db.Query(Note).filter("slug =", decoded_slug).get()
     
   @classmethod
   def count(cls):
@@ -85,6 +88,14 @@ class Comment(db.Model):
   
 class Helpers:
   """ Just a helper methods """
+
+  SLUGIFY_P = re.compile(r"[^\w\s-]", re.UNICODE)
+  SLUGIFY_P2 = re.compile('\s+')
+    
+  def slugify(self, text):
+    slug = Helpers.SLUGIFY_P.sub('', text.lower())
+    return Helpers.SLUGIFY_P2.sub('-', slug)
+  
   def get_html(self, template_name, _vars = {}, ext = 'html'):
     return template.render(os.path.join(os.path.dirname(__file__), TEMPLATES_PATH, '%s.%s' % (template_name, ext)), _vars)
   
@@ -155,11 +166,13 @@ class CreateHandler(webapp.RequestHandler, Helpers):
         
         note = Note.get_by_id(_id)
       else:
+        logging.debug('Initializing new note...')
         note = Note()
         note.uuid = str(uuid.uuid4())
         note.author = users.get_current_user()
       
       note.title = self.request.get('title')
+      note.slug = self.slugify(note.title)
       note.content = self.request.get('text')
       
       tags = map(string.strip, self.request.get('tags').split(','))
@@ -281,22 +294,11 @@ class FetchCommentsHandler(webapp.RequestHandler, Helpers):
 
 class NoteHandler(webapp.RequestHandler, Helpers):
   """ Will show a certain note """
-  def get(self, note_id):
-    logging.debug('Show note id: %s' % note_id)
-    
-    try:
-      _id = int(note_id)
-    except ValueError:
-      self.error(404)
-      return
-      
-      
-    note = Note.get_by_id(_id)
-
+  def get(self, slug):
+    note = Note.get_by_slug(urllib.unquote(slug))
     if not note:
-      logging.debug('Note with id: %s was not found' % note_id)
+      logging.debug('Note for slug: %s was not found' % slug)
       self.error(404)
-      self.response.out.write('shit')
       return
 
     self.render_a(self.response, 'single-note', { 'entry': note })
@@ -328,16 +330,16 @@ def main():
   logging.getLogger().setLevel(logging.DEBUG)
   
   application = webapp.WSGIApplication([
-    ('/([\d]*)', MainHandler),
-    ('/new', NewHandler),
-    ('/create', CreateHandler),
-    ('/add-comment', CommentHandler),
-    ('/fetch-comments', FetchCommentsHandler),
-    (r'/note/([0-9]+)-[^\?/#]+', NoteHandler),
-    ('/edit', EditHandler),
-    ('/delete', DeleteHandler),
-    ('/feed', FeedHandler),
-    ('/faq', FaqHandler)
+    (r'/([\d]*)', MainHandler),
+    (r'/new', NewHandler),
+    (r'/create', CreateHandler),
+    (r'/add-comment', CommentHandler),
+    (r'/fetch-comments', FetchCommentsHandler),
+    (r'/note/([^/]+)', NoteHandler),
+    (r'/edit', EditHandler),
+    (r'/delete', DeleteHandler),
+    (r'/feed', FeedHandler),
+    (r'/faq', FaqHandler)
     ], debug=True)
   wsgiref.handlers.CGIHandler().run(application)
 
