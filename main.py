@@ -76,6 +76,13 @@ class Comment(db.Model):
   content = db.TextProperty()
   created_at = db.DateTimeProperty(auto_now_add=True)
   
+  @classmethod
+  def delete_for_note(cls, note):
+    comments = db.Query(Comment).filter('note = ', note)
+    for comment in comments:
+      logging.debug('Deleting a comment: %s' % comment.content)
+      comment.delete()
+  
 class Helpers:
   """ Just a helper methods """
   def get_html(self, template_name, _vars = {}, ext = 'html'):
@@ -123,7 +130,7 @@ class MainHandler(webapp.RequestHandler, Helpers):
     template_values = {
       'entries': entries,
       'next': Note.next_page(page),
-      'prev': page - 1 if entries != None else None
+      'prev': page - 1 if entries != None else -1
     }
 
     self.render_a(self.response, 'index', template_values)
@@ -210,6 +217,7 @@ class DeleteHandler(webapp.RequestHandler, Helpers):
 
         note = Note.get_by_id(_id)
         if note:
+          Comment.delete_for_note(note)
           note.delete()
           status = True
         else:
