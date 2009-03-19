@@ -8,14 +8,14 @@
     <span class='name'><a href="/note/{{ entry.encoded_slug }}">{{ entry.title|escape }}</a></span><span class='info'><span>&nbsp;&#151;&nbsp;{{ entry.created_at|date }}&nbsp;|</span>
     <span class='tags'>{{ entry.tags|join:", " }}</span>{% if admin %} [ <a href="#" class="l_edit">редактировать</a>, <a href="#" class="l_remove">удалить</a> ]{% endif %}</span>
   </div>
-  <div class='text'>{{ entry.content|escape }}</div>
+  <div class='text'>{{ entry.formatted_content }}</div>
   {% block comments %}
     {% if entry.comments.count %}
     <div class='cwl'>
     <div class='ba'></div>
     <div class="cs">
     {% for comment in entry.comments %}
-    <div class="c"><span>{{ comment.content }}</span><span class="author ll">&nbsp;&#151;&nbsp;{{ comment.author.nickname }}</span></div>
+    <div class="c"><span>{{ comment.content|escape }}</span><span class="author ll">&nbsp;&#151;&nbsp;{{ comment.author.nickname }}</span></div>
     {% endfor %}
     {% if user %}<div class="c add ll"><a href="#" class="l_comment">Добавить комментарий</a></div>{% endif %}
     </div>

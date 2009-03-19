@@ -31,6 +31,9 @@ class Note(db.Model):
   created_at = db.DateTimeProperty(auto_now_add=True)
   updated_at = db.DateTimeProperty(auto_now=True)
   
+  def formatted_content(self):
+    return string.replace(self.content, '\n', '<br/>')
+  
   def encoded_slug(self):
     return urllib.quote(self.slug.encode('utf-8'))
   
