@@ -280,5 +280,9 @@ h2.lf {
 /*** STATIC ***/
 
 #static li {
-  margin-top: 2em;
+  margin-top: 1em;
+}
+
+#static p {
+  color: #222;
 }

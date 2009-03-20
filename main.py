@@ -20,7 +20,6 @@ IPP = 10
 TEMPLATES_PATH = 'view'
 NOTE_URL_PREFIX = '/note/'
 
-
 class Note(db.Model):
   author = db.UserProperty()
   title = db.StringProperty()
@@ -53,7 +52,7 @@ class Note(db.Model):
   @classmethod
   def get_page(cls, page = 0):
     if Note.count() > page * IPP:
-      return db.Query(Note).order('-created_at').fetch(10, page * IPP)
+      return db.Query(Note).order('-created_at').fetch(IPP, page * IPP)
     return None
     
   @classmethod
@@ -62,7 +61,7 @@ class Note(db.Model):
     
   @classmethod
   def next_page(cls, page = 0):
-    if Note.count() >= (page + 1) * 10 + 1:
+    if Note.count() >= (page + 1) * IPP + 1:
       return page + 1
     else:
       return None
@@ -74,7 +73,6 @@ class Note(db.Model):
       return []
     else:
       return note.comments
-
 
 class Comment(db.Model):
   note = db.ReferenceProperty(Note, collection_name='comments')
@@ -115,6 +113,10 @@ class Helpers:
     _tmp.update(_json_vars)
     self.render_simple_json(response, _tmp)
     
+  def render_error_json(self, response, msg):
+    logging.debug(msg)
+    self.render_simple_json(response, {'status': False, 'msg': msg})
+    
   def render_a(self, response, template_name, _vars = {}):
     user = users.get_current_user()
     if user:
@@ -131,7 +133,7 @@ class Helpers:
     
     _tmp.update(_vars)
     self.render(response, template_name, _tmp)
-  
+    
 class MainHandler(webapp.RequestHandler, Helpers):
   """ Handles index page """
   def get(self, page = 0):
@@ -165,7 +167,8 @@ class CreateHandler(webapp.RequestHandler, Helpers):
         try:
           _id = int(note_id)
         except ValueError:
-          logging.error('Unable to parse note id: %i' % _id)
+          self.render_error_json(self.request, 'Unable to parse note id: %i' % _id)
+          return
         
         note = Note.get_by_id(_id)
       else:
@@ -186,7 +189,7 @@ class CreateHandler(webapp.RequestHandler, Helpers):
       note.tags = map(db.Category, tags)
       
       note.put()
-      logging.debug('Post created')
+      logging.debug('Post created: %s' % note.title)
       
       template_vars = {
         'entry': note, 
@@ -195,36 +198,30 @@ class CreateHandler(webapp.RequestHandler, Helpers):
       
       self.render_json(self.response, 'note', template_vars)
     else:
-      logging.debug('Unable to create a post: user is not an admin')
-      self.error(403)
+      self.render_error_json(self.response, 'Unable to create a post: user is not an admin')
 
 class EditHandler(webapp.RequestHandler, Helpers):
   """ Edit note """
   def post(self):
     if users.is_current_user_admin():
       note_id = self.request.get('note_id')
-      
+
       try:
         _id = int(note_id)
-      except ValueError:
-        logging.debug('Unable to parse note id: %i' % _id)
-        self.error(404)
-        return
+        note = Note.get_by_id(_id)
+        if not note:
+          self.render_error_json(self.response, 'Note for id: %i was not found' % _id)
+          return
 
-      note = Note.get_by_id(_id)
-      if not note:
-        self.error(404)
-        return
-        
-      self.render_json(self.response, 'note-form', {'entry': note})
+        self.render_json(self.response, 'note-form', {'entry': note})
+      except ValueError:
+        self.render_error_json(self.response, 'Unable to parse note id: %i' % _id)
     else:
-      logging.error('Non-admin users can not edit notes!')
+      self.render_error_json(self.response, 'Restricted area')
 
 class DeleteHandler(webapp.RequestHandler, Helpers):
   """ Remove note """
   def post(self):
-    status = False
-
     if users.is_current_user_admin():
       note_id = self.request.get('note_id')
       
@@ -232,20 +229,17 @@ class DeleteHandler(webapp.RequestHandler, Helpers):
         _id = int(note_id)
 
         note = Note.get_by_id(_id)
-        if note:
-          Comment.delete_for_note(note)
-          note.delete()
-          status = True
-        else:
-          logging.debug('Unable to find note for id: %i' % _id)
+        if not note:
+          self.render_error_json(self.response, 'Unable to find note for id: %i' % _id)
+          return
+          
+        Comment.delete_for_note(note)
+        note.delete()
+        self.render_simple_json(self.response, {'status': True})
       except ValueError:
-        logging.debug('Unable to parse note id: %i' % _id)
-        return
+        self.render_error_json(self.response, 'Unable to parse note id: %i' % _id)
     else:
-      logging.error('Non-admin users can not delete notes!')
-
-    self.render_simple_json(self.response, {'status': status})
-
+      self.render_error_json(self.response, 'Restricted area')
 
 class CommentHandler(webapp.RequestHandler, Helpers):
   """ Will add a comment """
@@ -256,25 +250,26 @@ class CommentHandler(webapp.RequestHandler, Helpers):
       
       try:
         _id = int(note_id)
-      except ValueError:
-        logging.debug('Unable to parse note id: %i' % _id)
-
-      note = Note.get_by_id(_id)
-      if note:
-        logging.debug('Ok, adding the comment to: %s' % note.title)
         
+        note = Note.get_by_id(_id)
+        if not note:
+          self.render_error_json(self.response, 'Unable to find a note for id: %s' % note_id)
+          return
+        
+        logging.debug('Ok, adding the comment to: %s' % note.title)
+
         comment = Comment()
         comment.note = note
         comment.author = users.get_current_user()
         comment.content = self.request.get('comment')
-          
+
         comment.put()
-        
+
         self.render_json(self.response, 'comments', {'comments': [comment]})
-      else:
-        logging.debug('Unable to find a note for id: %s' % note_id)
+      except ValueError:
+        self.render_error_json(self.response, 'Unable to parse note id: %i' % _id)
     else:
-      logging.debug('User should be logged in to be able to post comments!')
+      self.render_error_json(self.response, 'Login to be able to post comments!')
 
 class FetchCommentsHandler(webapp.RequestHandler, Helpers):
   """ Will return comments for the given note """
@@ -283,17 +278,14 @@ class FetchCommentsHandler(webapp.RequestHandler, Helpers):
     
     try:
       _id = int(note_id)
-    except ValueError:
-      logging.debug('Unable to parse note id: %s' % note_id)
-      self.error(404)
-      return
 
-    template_vars = {
-      'comments': Note.get_comments(_id)
-    }
-      
-    self.render_json(self.response, 'comments', template_vars, { 'user': users.get_current_user() != None })
-  
+      template_vars = {
+        'comments': Note.get_comments(_id)
+      }
+
+      self.render_json(self.response, 'comments', template_vars, { 'user': users.get_current_user() != None })
+    except ValueError:
+      self.render_error_json(self.response, 'Unable to parse note id: %s' % note_id)
 
 class NoteHandler(webapp.RequestHandler, Helpers):
   """ Will show a certain note """
@@ -302,6 +294,7 @@ class NoteHandler(webapp.RequestHandler, Helpers):
     if not note:
       logging.debug('Note for slug: %s was not found' % slug)
       self.error(404)
+      self.render(self.response, '404')
       return
 
     self.render_a(self.response, 'single-note', { 'entry': note })
@@ -328,6 +321,12 @@ class FaqHandler(webapp.RequestHandler, Helpers):
   def get(self):
     self.render(self.response, 'faq')
     
+class NotFoundPageHandler(webapp.RequestHandler, Helpers):
+  """ Will render a 404 page """
+  def get(self):
+    self.error(404)
+    self.render(self.response, '404')
+    
 def main():
   # set logging level
   logging.getLogger().setLevel(logging.DEBUG)
@@ -342,8 +341,10 @@ def main():
     (r'/edit', EditHandler),
     (r'/delete', DeleteHandler),
     (r'/feed', FeedHandler),
-    (r'/faq', FaqHandler)
+    (r'/faq', FaqHandler),
+    (r'/.*', NotFoundPageHandler)
     ], debug=True)
+    
   wsgiref.handlers.CGIHandler().run(application)
 
 
