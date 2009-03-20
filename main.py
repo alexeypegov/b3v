@@ -306,6 +306,9 @@ class FeedHandler(webapp.RequestHandler, Helpers):
     recent = Note.get_recent()
     if len(recent):
       updated = recent[0].w3cdtf()
+    else:
+      updated = None
+      recent = None
     
     url_prefix = 'http://' + self.request.environ['SERVER_NAME']
     port = self.request.environ['SERVER_PORT']
