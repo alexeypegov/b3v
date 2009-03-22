@@ -4,9 +4,15 @@
 
 {% block content %}
 <div id='notes'>
-{% for entry in entries %}
-{% include "note.html" %}
-{% endfor %}
+{% if entries %}
+  {% for entry in entries %}
+  {% include "note.html" %}
+  {% endfor %}
+{% else %}
+<span class="empty-list">
+Здесь пока ничего нет :)
+</span>
+{% endif %}
 </div>
 <div id="paging" class="g">
 {% ifnotequal prev -1 %}
