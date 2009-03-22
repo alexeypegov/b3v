@@ -16,23 +16,25 @@ jQuery.fn.disable = function() {
 jQuery.fn.makeExpandable = function(A, D) {
     var B = "5em";
     this.keypress(function(F) {
-        if (F.keyCode == 13 && D) {
-            D(this);
-            return false
-        }
-        if (this.value.length >= A && F.charCode > 8 && F.charCode < 63200) {
-            return false
-        }
-        if (this.style.height != B) {
-            var E = this;
-            setTimeout(function() {
-                if (E.value.indexOf("\n") != -1 || E.scrollTop > 0 || E.scrollLeft > 0 || E.scrollHeight > E.offsetHeight) {
-                    E.style.height = B
-                }
-            }, 10)
-        }
+      if (F.keyCode == 13 && D) {
+        D(this);
+        return false;
+      }
+      
+      if (this.value.length >= A && F.charCode > 8 && F.charCode < 63200) {
+        return false;
+      }
+      
+      if (this.style.height != B) {
+        var E = this;
+        setTimeout(function() {
+          if (E.value.indexOf("\n") != -1 || E.scrollTop > 0 || E.scrollLeft > 0 || E.scrollHeight > E.offsetHeight) {
+            E.style.height = B;
+          }
+        }, 10);
+      }
     });
-    return this
+    return this;
 };
 
 jQuery.fn.submitForm = function(action) {
@@ -225,10 +227,8 @@ clickHandlers.comment = function(e) {
       if (!note.selectEmptyFormElement()) {
         note.find("input[type=submit]").disable();
         $.postJSON('/add-comment', note.getFormData(), function(data) {
-          var cw = N.find(".cw");
-          if (cw.length) {
-            cw.remove();
-          } 
+          N.find('.cw').remove();
+          N.find('.add').remove();
           
           var result = $(data.html);
           N.find('.commentform').replaceWith(result);
@@ -244,18 +244,16 @@ clickHandlers.comment = function(e) {
 
 clickHandlers.cancelComment = function(e) {
   var N = e.parents(".note");
-  var cs = N.find(".c");
-  if (cs.length == 1) {
-    var cwl = N.find(".cwl");
-    if (cwl.length) {
-      var cw = cwl.prev(".cw");
-      if (cw.length) {
-        cwl.remove();
-        cw.show();
-      }
-    }
+  
+  var cw = N.find('.cw');
+  var cwl = N.find('.cwl');
+  
+  if (cw.length) {
+    cw.show();
+    cwl.remove();
   } else {
-    N.find(".commentform").replaceWith('<div class="c add ll"><a href="#" class="l_comment">Добавить комментарий</a></div>');
+    cwl.find('.commentform').remove();
+    cwl.find('.add').show();
   }
 };
 
@@ -271,9 +269,6 @@ clickHandlers.expand = function(e) {
       var C = $('<div class="cwl"><div class="ba"></div></div>');
       var CS = $('<div class="cs">%(data)</div>'.replace('%(data)', data.html));
       C.append(CS);
-      if (data.user) {
-        CS.append('<div class="c add ll"><a href="#" class="l_comment">Добавить комментарий</a></div>');
-      }
       W.replaceWith(C);
   });
 };

@@ -113,11 +113,17 @@ class Helpers:
     _tmp.update(_json_vars)
     self.render_simple_json(response, _tmp)
     
+  def render_json_a(self, response, template_name, _vars = {}, _json_vars = {}):
+    self.render_json(response, template_name, self.add_auth_info(_vars), _json_vars)
+    
   def render_error_json(self, response, msg):
     logging.debug(msg)
     self.render_simple_json(response, {'status': False, 'msg': msg})
     
   def render_a(self, response, template_name, _vars = {}):
+    self.render(response, template_name, self.add_auth_info(_vars))
+    
+  def add_auth_info(self, _vars = {}):
     user = users.get_current_user()
     if user:
       url = users.create_logout_url(self.request.uri)
@@ -132,7 +138,7 @@ class Helpers:
     }
     
     _tmp.update(_vars)
-    self.render(response, template_name, _tmp)
+    return _tmp
     
 class MainHandler(webapp.RequestHandler, Helpers):
   """ Handles index page """
@@ -196,7 +202,7 @@ class CreateHandler(webapp.RequestHandler, Helpers):
         'admin': users.is_current_user_admin()
       }
       
-      self.render_json(self.response, 'note', template_vars)
+      self.render_json_a(self.response, 'note', template_vars)
     else:
       self.render_error_json(self.response, 'Unable to create a post: user is not an admin')
 
@@ -265,7 +271,7 @@ class CommentHandler(webapp.RequestHandler, Helpers):
 
         comment.put()
 
-        self.render_json(self.response, 'comments', {'comments': [comment]})
+        self.render_json_a(self.response, 'comments', {'comments': [comment]})
       except ValueError:
         self.render_error_json(self.response, 'Unable to parse note id: %i' % _id)
     else:
@@ -283,7 +289,7 @@ class FetchCommentsHandler(webapp.RequestHandler, Helpers):
         'comments': Note.get_comments(_id)
       }
 
-      self.render_json(self.response, 'comments', template_vars, { 'user': users.get_current_user() != None })
+      self.render_json_a(self.response, 'comments', template_vars)
     except ValueError:
       self.render_error_json(self.response, 'Unable to parse note id: %s' % note_id)
 
