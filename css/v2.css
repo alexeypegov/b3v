@@ -3,7 +3,7 @@ body, p, form {
 }
 
 body {
-  font: 100%/1.25 arial, serif;
+  font: 100%/1.25 "Arial", sans-serif;
 }
 
 p {
@@ -279,12 +279,12 @@ h2.lf {
 }
 
 .commentform .buttons {
-  font: 90% "Arial", serif;
+  font-size: 90%;
   padding-top: 5px;
 }
 
 .commentform input {
-  font: 90% "Arial", serif;
+  font-size: 90%;
   margin-right: 1em;
 }
 
