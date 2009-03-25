@@ -8,7 +8,7 @@
   {% if entry.comments.count %}
   <div class='ba'></div>
   <div class='w clearfix'>
-    <div class='b lg'><a href="#" class="l_expand">{{ entry.comments.count }} комментарий</a></div>
+    <div class='b lg'><a href="#" class="l_expand">{{ entry.comments.count|comment_text }}</a></div>
   </div>
   {% else %}
   {% block add_comment %}

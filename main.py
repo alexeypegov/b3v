@@ -16,6 +16,9 @@ from google.appengine.ext.webapp import template
 from django.utils import simplejson
 from django.core.paginator import ObjectPaginator, InvalidPage
 
+"""Load custom Django template filters"""
+webapp.template.register_template_library('filters')
+
 IPP = 10
 TEMPLATES_PATH = 'view'
 NOTE_URL_PREFIX = '/note/'
