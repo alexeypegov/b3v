@@ -196,6 +196,21 @@ h2.lf {
   padding-left: 0;
 }
 
+
+.note code {
+  font-size: 130%;
+}
+
+.note pre {
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  font-size: 110%;
+/*  margin: 0;*/
+  padding: 1em;
+  background-color: #E8ECED;
+  color: #723147;
+}
+
 /*
 #notes .note .text a {
   color: #444;
