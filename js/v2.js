@@ -1,10 +1,18 @@
 /* (c) alexey pegov, 2008 */
 
-jQuery.postJSON = function(url, data, callback) {
+jQuery.postJSON = function(url, data, callback, at) {
+  if (at) {
+    showProgress(at);
+  }
+   
   $.post(url, data, callback, "json");
 };
 
-jQuery.getJSON = function(url, data, callback) {
+jQuery.getJSON = function(url, data, callback, at) {
+  if (at) {
+    showProgress(at);
+  }
+   
   $.get(url, data, callback, "json");
 };
 
@@ -107,6 +115,22 @@ jQuery.fn.selectEmptyFormElement = function() {
   return empty != null;
 };
 
+
+function showProgress(at) {
+  if (at && at.length > 0) {
+    hideProgress();
+    var offset = at.offset();
+    var width = at.width();
+    var pos = offset.left - 16;
+    loader = $('<div id="progress" style="width: 16px; height: 16px; position: absolute; top: ' + offset.top + "px; left: " + pos + 'px; z-index:200000"><img src="/i/ajax-loader.gif?v=1" width="16" height="16" alt="' + 'Loading...' + '"/></div>');
+    $(document.body).append(loader);
+  }
+}
+
+function hideProgress() {
+  $("#progress").remove();
+}
+
 var clickHandlers = {};
 
 $(function() {
@@ -126,6 +150,10 @@ $(function() {
         return handler($(_e), E) ? undefined : false;
       }
     }
+  });
+
+  $('body').ajaxComplete(function(request, settings) {
+    hideProgress();
   });
 });
 
@@ -232,10 +260,10 @@ clickHandlers.comment = function(e) {
           
           var result = $(data.html);
           N.find('.commentform').replaceWith(result);
-          result.effect("highlight", {}, 1000);
+          // result.effect("highlight", {}, 1000);
           
           N.find('.add').show();
-        });
+        }, N.find('.commentform'));
       }
     });
 
@@ -270,5 +298,5 @@ clickHandlers.expand = function(e) {
       var CS = $('<div class="cs">%(data)</div>'.replace('%(data)', data.html));
       C.append(CS);
       W.replaceWith(C);
-  });
+  }, P.find('.w'));
 };
