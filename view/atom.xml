@@ -17,10 +17,10 @@
  {% for entry in entries %}
  <entry>
    <title>{{ entry.title }}</title>
-   <link href="{{ prefix }}{{ entry.slug }}"/>
+   <link rel="alternate" href="{{ prefix }}{{ entry.slug }}"/>
    <id>urn:uuid:{{ entry.uuid }}</id>
    <updated>{{ entry.w3cdtf }}</updated>
-   <summary>{{ entry.content }}</summary>
+   <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">{{ entry.content }}</div></summary>
  </entry>
  {% endfor %}
  
