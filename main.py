@@ -92,10 +92,12 @@ class Helpers:
 
   SLUGIFY_P = re.compile(r"[^\w\s-]", re.UNICODE)
   SLUGIFY_P2 = re.compile('\s+')
+  SLUGIFY_P3 = re.compile('-+')
     
   def slugify(self, text):
     slug = Helpers.SLUGIFY_P.sub('', text.lower())
-    return Helpers.SLUGIFY_P2.sub('-', slug)
+    slug = Helpers.SLUGIFY_P2.sub('-', slug)
+    return Helpers.SLUGIFY_P3.sub('-', slug)
   
   def get_html(self, template_name, _vars = {}, ext = 'html'):
     return template.render(os.path.join(os.path.dirname(__file__), TEMPLATES_PATH, '%s.%s' % (template_name, ext)), _vars)

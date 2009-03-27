@@ -211,6 +211,16 @@ h2.lf {
   color: #723147;
 }
 
+.note blockquote {
+  font-style: italic;
+  color: #BF452A;
+}
+
+.note blockquote span {
+  color: #777;
+  font-style: normal;
+}
+
 /*
 #notes .note .text a {
   color: #444;
