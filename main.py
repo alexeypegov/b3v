@@ -338,7 +338,7 @@ class NotFoundPageHandler(webapp.RequestHandler, Helpers):
     
 def main():
   # set logging level
-  logging.getLogger().setLevel(logging.DEBUG)
+  # logging.getLogger().setLevel(logging.DEBUG)
   
   application = webapp.WSGIApplication([
     (r'/([\d]*)', MainHandler),
@@ -352,7 +352,7 @@ def main():
     (r'/feed', FeedHandler),
     (r'/faq', FaqHandler),
     (r'/.*', NotFoundPageHandler)
-    ], debug=True)
+    ], debug=False)
     
   wsgiref.handlers.CGIHandler().run(application)
 
