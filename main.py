@@ -72,7 +72,7 @@ class Note(db.Model):
     if not note:
       return []
     else:
-      return note.comments
+      return db.GqlQuery("SELECT * FROM Comment WHERE note = :1 ORDER BY created_at", note)
 
 class Comment(db.Model):
   note = db.ReferenceProperty(Note, collection_name='comments')
