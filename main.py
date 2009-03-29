@@ -65,10 +65,18 @@ class Note(db.Model):
       return page + 1
     else:
       return None
-      
+  
+  def sorted_comments(self):
+    return Note.get_comments(self);
+  
   @classmethod
-  def get_comments(cls, id):
-    note = Note.get_by_id(id)
+  def get_comments(cls, _note):
+    """ get sorted comments by note id or note instance """
+    if isinstance(_note, Note):
+      note = _note
+    else:
+      note = Note.get_by_id(_note)
+    
     if not note:
       return []
     else:

@@ -14,7 +14,7 @@
     <div class='cwl'>
     <div class='ba'></div>
     <div class="cs">
-    {% for comment in entry.comments %}
+    {% for comment in entry.sorted_comments %}
     <div class="c"><span>{{ comment.content|escape }}</span><span class="author ll">&nbsp;&#151;&nbsp;{{ comment.author.nickname }}</span></div>
     {% endfor %}
     {% if user %}<div class="c add ll"><a href="#" class="l_comment">Добавить комментарий</a></div>{% endif %}
