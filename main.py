@@ -328,7 +328,7 @@ class FeedHandler(webapp.RequestHandler, Helpers):
     
     url_prefix = 'http://' + self.request.environ['SERVER_NAME']
     port = self.request.environ['SERVER_PORT']
-    if port:
+    if port and port != '80':
         url_prefix += ':%s' % port
     url_prefix += NOTE_URL_PREFIX
     
