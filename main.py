@@ -345,10 +345,15 @@ class NotFoundPageHandler(webapp.RequestHandler, Helpers):
   def get(self):
     self.error(404)
     self.render(self.response, '404')
+
+def is_dev_env():
+  """ Checks whatever we are under devel environment (localhost) """
+  return os.environ.get('SERVER_SOFTWARE','').startswith('Devel') # 'Goog' for production
     
 def main():
   # set logging level
-  # logging.getLogger().setLevel(logging.DEBUG)
+  if is_dev_env():
+    logging.getLogger().setLevel(logging.DEBUG)
   
   application = webapp.WSGIApplication([
     (r'/([\d]*)', MainHandler),
@@ -362,7 +367,7 @@ def main():
     (r'/feed', FeedHandler),
     (r'/faq', FaqHandler),
     (r'/.*', NotFoundPageHandler)
-    ], debug=False)
+    ], debug=is_dev_env())
     
   wsgiref.handlers.CGIHandler().run(application)
 
