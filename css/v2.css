@@ -212,8 +212,9 @@ h2.lf {
 }
 
 .note blockquote {
+  margin: 1em 0;
   font-style: italic;
-  color: #BF452A;
+  color: #723147;
 }
 
 .note blockquote span {
