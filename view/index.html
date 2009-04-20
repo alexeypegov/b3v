@@ -14,17 +14,24 @@
 </span>
 {% endif %}
 </div>
-<div id="paging" class="g ll clearfix">
+<div id="paging" class="ll clearfix">
+{% if next %}<div class="r">&#8592; Ctrl &#8594;</div>
+{% else %}
+{% ifnotequal prev -1 %}
+<div class="r">&#8592; Ctrl &#8594;</div>
+{% endifnotequal %}
+{% endif %}
+
 {% ifnotequal prev -1 %}
   {% ifequal prev 0 %}
-    <a class="n_37" href="/">&#8592;</a>&nbsp;
+    <a class="n_37" href="/">&#171; Предыдущая страница</a>
   {% else %}
-    <a class="n_37" href="/{{ prev }}">&#8592;</a>&nbsp;
+    <a class="n_37" href="/{{ prev }}">&#171; Предыдущая страница</a>
   {% endifequal %}
+  {% if next %}&nbsp;|&nbsp;{% endif %}
 {% endifnotequal %}
-Ctrl
 {% if next %}
-&nbsp;<a class="n_39" href="/{{ next }}">&#8594;</a>
+<a class="n_39" href="/{{ next }}">Следующая страница &#187;</a>
 {% endif %}
 </div>
 {% endblock %}
