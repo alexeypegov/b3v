@@ -10,20 +10,20 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
-# Used 7 times in query history.
+# Used once in query history.
 - kind: Comment
   properties:
   - name: note
   - name: created_at
 
-# Used once in query history.
+# Unused in query history -- copied from input.
 - kind: Comment
   properties:
   - name: note
   - name: created_at
     direction: desc
 
-# Used 5 times in query history.
+# Unused in query history -- copied from input.
 - kind: Comment
   properties:
   - name: note

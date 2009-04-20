@@ -57,6 +57,10 @@ h2.lf {
   text-decoration: underline;
 }
 
+.r {
+  float: right;
+}
+
 /* float clearing for IE6 */
 * html .clearfix{
   height: 1%;
@@ -316,6 +320,12 @@ h2.lf {
 
 .c .author {
   color: #999;
+}
+
+/*** PAGING ***/
+
+#paging {
+  text-align: center;
 }
 
 /*** STATIC ***/

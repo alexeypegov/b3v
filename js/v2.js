@@ -131,6 +131,12 @@ function hideProgress() {
   $("#progress").remove();
 }
 
+function executeLink(T) {
+  document.location = T.attr('href');
+}
+
+var keyCodes = {};
+
 var clickHandlers = {};
 
 $(function() {
@@ -155,8 +161,29 @@ $(function() {
   $('body').ajaxComplete(function(request, settings) {
     hideProgress();
   });
+
+  $(document).keydown(function(e) {
+    if (e.ctrlKey) {
+      var anchor = keyCodes['' + e.keyCode];
+      if (anchor) {
+        executeLink(anchor);
+      }
+    }
+  });
+
+  $('a').each(function() {
+    var a = this;
+    if (!a.className) return;
+
+    var key = a.className.match(/\bn_([0-9]+)\b/);
+    if (!key) return;
+
+    keyCodes[key[1]] = $(a);
+  });
 });
 
+$(document).ready(function () {
+});
 
 clickHandlers.create = function(e) {
   var create = $('#note-form');
@@ -251,26 +278,40 @@ clickHandlers.comment = function(e) {
   }
 
   N.find("input[type=submit]").click(function(E) {
-      var note = $(E.target).parents(".note");
-      if (!note.selectEmptyFormElement()) {
-        note.find("input[type=submit]").disable();
-        $.postJSON('/add-comment', note.getFormData(), function(data) {
-          N.find('.cw').remove();
-          N.find('.add').remove();
-          
-          var result = $(data.html);
-          N.find('.commentform').replaceWith(result);
-          // result.effect("highlight", {}, 1000);
-          
-          N.find('.add').show();
-        }, N.find('.commentform'));
-      }
-    });
+    submitComment(N);
+  });
 
   N.find("textarea").makeExpandable(512, function() {}).focus().keypress();
+  
+  N.find("textarea").keydown(function(e) {
+    switch(e.keyCode) {
+      case 27:
+        cancelComment(N.find('.commentform'));
+        break;
+      case 13:
+        submitComment(N);
+        break;
+    }
+  });
 };
 
-clickHandlers.cancelComment = function(e) {
+function submitComment(note) {
+  if (!note.selectEmptyFormElement()) {
+    note.find("input[type=submit]").disable();
+    $.postJSON('/add-comment', note.getFormData(), function(data) {
+      note.find('.cw').remove();
+      note.find('.add').remove();
+      
+      var result = $(data.html);
+      note.find('.commentform').replaceWith(result);
+      // result.effect("highlight", {}, 1000);
+      
+      note.find('.add').show();
+    }, note.find('.commentform'));
+  }
+};
+
+function cancelComment(e) {
   var N = e.parents(".note");
   
   var cw = N.find('.cw');
@@ -283,6 +324,10 @@ clickHandlers.cancelComment = function(e) {
     cwl.find('.commentform').remove();
     cwl.find('.add').show();
   }
+};
+
+clickHandlers.cancelComment = function(e) {
+  cancelComment(e);
 };
 
 clickHandlers.expand = function(e) {
