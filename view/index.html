@@ -15,23 +15,13 @@
 {% endif %}
 </div>
 <div id="paging" class="ll clearfix">
-{% if next %}<div class="r">&#8592; Ctrl &#8594;</div>
-{% else %}
 {% ifnotequal prev -1 %}
-<div class="r">&#8592; Ctrl &#8594;</div>
-{% endifnotequal %}
-{% endif %}
-
-{% ifnotequal prev -1 %}
-  {% ifequal prev 0 %}
-    <a class="n_37" href="/">&#171; Предыдущая страница</a>
-  {% else %}
-    <a class="n_37" href="/{{ prev }}">&#171; Предыдущая страница</a>
-  {% endifequal %}
-  {% if next %}&nbsp;|&nbsp;{% endif %}
-{% endifnotequal %}
-{% if next %}
-<a class="n_39" href="/{{ next }}">Следующая страница &#187;</a>
+{% ifequal prev 0 %}<a class="n_37" href="/">Предыдущая страница</a>{% else %}<a class="n_37" href="/{{ prev }}">Предыдущая страница</a>{% endifequal %}
+{% else %}<a class="d" nohref="true">Предыдущая страница</a>{% endifnotequal %}
+&nbsp;&nbsp;&nbsp;&nbsp;
+{% if next %}<a class="n_39" href="/{{ next }}">Следующая страница</a>{% else %}<a class="d" nohref="true">Следующая страница</a>{% endif %}
+{% if next %}<div class="c">&#8592;&nbsp;Ctrl&nbsp;&#8594;</div>{% else %}
+{% ifnotequal prev -1 %}<div class="c">&#8592;&nbsp;Ctrl&nbsp;&#8594;</div>{% endifnotequal %}
 {% endif %}
 </div>
 {% endblock %}

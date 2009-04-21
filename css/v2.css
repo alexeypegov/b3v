@@ -61,6 +61,10 @@ h2.lf {
   float: right;
 }
 
+.l {
+  float: left;
+}
+
 /* float clearing for IE6 */
 * html .clearfix{
   height: 1%;
@@ -325,7 +329,22 @@ h2.lf {
 /*** PAGING ***/
 
 #paging {
-  color: #999;
+  text-align: center;
+  font-size: 90%;
+}
+
+#paging a.d {
+  color: #aaa;
+}
+
+#paging a.d:hover {
+  text-decoration: none;
+}
+
+#paging div {
+  font-size: 90%;
+  color: #aaa;
+  margin-top: 0.3em;
 }
 
 /*** STATIC ***/
