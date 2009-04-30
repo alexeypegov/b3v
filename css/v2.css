@@ -21,6 +21,10 @@ input[type=text] {
   padding: 2px;
 }
 
+img {
+  border: 0;
+}
+
 .lf {
   font-size: 130%;
 }
