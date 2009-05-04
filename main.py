@@ -157,12 +157,14 @@ class MainHandler(webapp.RequestHandler, Helpers):
       page = int(page)
     except ValueError:
       page = 0
-      
+    
     entries = Note.get_page(page)
     template_values = {
       'entries': entries,
       'next': Note.next_page(page),
-      'prev': page - 1 if entries != None else -1
+      'prev': page - 1 if entries != None else -1,
+      'page': page + 1,
+      'total': Note.count() / IPP + 1
     }
 
     self.render_a(self.response, 'index', template_values)

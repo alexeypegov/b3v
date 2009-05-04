@@ -1,8 +1,11 @@
 {% extends "layout.html" %}
 
-{% block title %}{% endblock %}
+{% block title %}{% ifnotequal prev -1 %}{{ page }} страница из {{ total }} - {% endifnotequal %}{% endblock %}
 
 {% block content %}
+{% ifnotequal prev -1 %}
+<div id='nav' class="ll"><a href="/">&larr; Хоум</a></div>
+{% endifnotequal %}
 <div id='notes'>
 {% if entries %}
   {% for entry in entries %}
