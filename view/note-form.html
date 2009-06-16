@@ -8,14 +8,14 @@
     <td class="h" colspan="2"><label for="c_title">Заголовок:</label></td>
   </tr>
   <tr>
-    <td><input type="text" name="title" id="c_title" autocomplete="off" value="{{ entry.title|default:"" }}"/></td>
+    <td><input type="text" name="title" id="c_title" autocomplete="off" value="{{ entry.title|default:title }}"/></td>
     <td class="ar">&nbsp;</td>
   </tr>
   <tr>
     <td class="h" colspan="2"><label for="c_text">Текст:</label></td>
   </tr>
   <tr>
-    <td colspan="2"><textarea name="text" id="c_text">{{ entry.content|default:"" }}</textarea></td>
+    <td colspan="2"><textarea name="text" id="c_text"></textarea></td>
   </tr>
   <tr>
     <td class="h"  colspan="2"><label for="c_tags">Теги:</label></td>
@@ -25,7 +25,7 @@
     <td>&nbsp;</td>
   </tr>
   <tr>
-    <td class="h"><input type="submit" value="{% if entry %}Сохранить{% else %}Опубликовать{%endif %}"/>&nbsp;<a href="#" class="l_cancelCreate">Отменить</a></td>
+    <td class="h"><input type="submit" value="{% if entry %}Сохранить{% else %}Опубликовать{% endif %}"/>&nbsp;<a href="#" class="l_cancelCreate">Отменить</a></td>
     <td>&nbsp;</td>
   </tr>
   </tbody>

@@ -8,6 +8,8 @@ import logging
 import wsgiref.handlers
 import urllib
 
+from time import gmtime, strftime
+
 from google.appengine.ext import db
 from google.appengine.api import users
 from google.appengine.ext import webapp
@@ -108,7 +110,9 @@ class Helpers:
     return Helpers.SLUGIFY_P3.sub('-', slug)
   
   def get_html(self, template_name, _vars = {}, ext = 'html'):
-    return template.render(os.path.join(os.path.dirname(__file__), TEMPLATES_PATH, '%s.%s' % (template_name, ext)), _vars)
+    _tmp = { 'debug': is_dev_env() }
+    _tmp.update(_vars)
+    return template.render(os.path.join(os.path.dirname(__file__), TEMPLATES_PATH, '%s.%s' % (template_name, ext)), _tmp)
   
   def render(self, response, template_name, _vars = {}, ext = 'html'):
     response.out.write(self.get_html(template_name, _vars, ext))
@@ -173,7 +177,7 @@ class NewHandler(webapp.RequestHandler, Helpers):
   """ Will send a create form """
   def get(self):
     if users.is_current_user_admin():
-      self.render_json(self.response, 'note-form')
+      self.render_json(self.response, 'note-form', {'title': strftime("%d-%m-%Y %H:%M", gmtime())})
 
 class CreateHandler(webapp.RequestHandler, Helpers):
   """ Will add / update a note """
@@ -220,10 +224,8 @@ class CreateHandler(webapp.RequestHandler, Helpers):
 
 class EditHandler(webapp.RequestHandler, Helpers):
   """ Edit note """
-  def post(self):
+  def get(self, note_id):
     if users.is_current_user_admin():
-      note_id = self.request.get('note_id')
-
       try:
         _id = int(note_id)
         note = Note.get_by_id(_id)
@@ -231,7 +233,7 @@ class EditHandler(webapp.RequestHandler, Helpers):
           self.render_error_json(self.response, 'Note for id: %i was not found' % _id)
           return
 
-        self.render_json(self.response, 'note-form', {'entry': note})
+        self.render_json(self.response, 'note-form', {'entry': note, 'title': ''}, {'content': note.content.encode('utf-8')})
       except ValueError:
         self.render_error_json(self.response, 'Unable to parse note id: %i' % _id)
     else:
@@ -364,7 +366,7 @@ def main():
     (r'/add-comment', CommentHandler),
     (r'/fetch-comments', FetchCommentsHandler),
     (r'/note/([^/]+)', NoteHandler),
-    (r'/edit', EditHandler),
+    (r'/edit/([\d]+)', EditHandler),
     (r'/delete', DeleteHandler),
     (r'/feed', FeedHandler),
     (r'/faq', FaqHandler),

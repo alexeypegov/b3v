@@ -1,4 +1,4 @@
-/* (c) alexey pegov, 2008 */
+/* (c) alexey pegov, 2008-2009 */
 
 jQuery.postJSON = function(url, data, callback, at) {
   if (at) {
@@ -192,9 +192,18 @@ clickHandlers.create = function(e) {
     return;
   }
   
+  // avoid multi-processing while waiting response from server
+  var existing_marker = $('#c_mark');
+  if (existing_marker.length > 0) {
+    return;
+  }
+  
+  var marker = $('<div style="display: none;" id="c_mark"></div>');
+  $('#head').after(marker);
+  
   $.getJSON("/new", {}, function(data) {
     var form = $(data.html);
-    $('#head').after(form);
+    $('#c_mark').replaceWith(form);
     form.find('input[type=text]:first').focus();
 
     form.find('input[type=submit]').click(function(T) {
@@ -236,10 +245,21 @@ clickHandlers.edit = function(e) {
   var id = P.find('input[type=hidden]').attr('value');
   if (!id) return;
   
-  $.postJSON("/edit", {'note_id': id}, function(data) {
+  // avoid multi-processing while waiting response from server
+  var existing_marker = $('#e_mark');
+  if (existing_marker.length > 0) {
+    return;
+  }
+  
+  var marker = $('<div style="display: none;" id="e_mark"></div>');
+  P.after(marker);
+  
+  $.getJSON("/edit/%(id)".replace('%(id)', id), {}, function(data) {
     P.hide();
     var form = $(data.html);
-    P.after(form);
+    marker.replaceWith(form);
+    
+    form.find('#c_text').text(data.content); // avoid content escaping
     form.find('textarea').focus();
     
     form.find('input[type=submit]').click(function(T) {
