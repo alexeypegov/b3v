@@ -3,8 +3,9 @@
  
  <title>Ложное движение</title>
  <subtitle>spLeanerSite v.3.0.</subtitle>
- <link href="http://feeds2.feedburner.com/spleaner" rel="self"/>
- <link href="http://spleaner.appspot.com/"/>
+ <icon>http://spleaner.appspot.com/i/favicon.png</icon>
+ <link rel="self" href="http://feeds2.feedburner.com/false-movement"/>
+ <link rel="alternate" type="text/html" href="http://spleaner.appspot.com/"/>
  
  {% if entries %}<updated>{{ updated }}</updated>{% else %}<updated>2008-12-12T18:30:00Z</updated>{% endif %}
  
@@ -17,10 +18,10 @@
  {% for entry in entries %}
  <entry>
    <title>{{ entry.title }}</title>
-   <link rel="alternate" href="{{ prefix }}{{ entry.slug }}"/>
+   <link rel="alternate" type="text/html" href="{{ prefix }}{{ entry.slug }}"/>
    <id>urn:uuid:{{ entry.uuid }}</id>
    <updated>{{ entry.w3cdtf }}</updated>
-   <summary type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">{{ entry.content }}</div></summary>
+   <content type="html">{{ entry.content|escape }}</content>
  </entry>
  {% endfor %}
  
