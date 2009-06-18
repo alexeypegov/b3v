@@ -46,7 +46,6 @@ class Note(db.Model):
   @classmethod
   def get_by_slug(cls, slug):
     decoded_slug = urllib.unquote(slug).decode('utf8')
-    logging.debug('Decoded slug: %s' % decoded_slug)
     return db.Query(Note).filter("slug =", decoded_slug).get()
     
   @classmethod
@@ -191,7 +190,6 @@ class NewHandler(webapp.RequestHandler, Helpers):
 class CreateHandler(webapp.RequestHandler, Helpers):
   """ Will add / update a note """
   def post(self):
-    logging.debug('Adding/updating note...')
     if users.is_current_user_admin():
       note_id = self.request.get('note_id')
       if note_id:
@@ -203,7 +201,6 @@ class CreateHandler(webapp.RequestHandler, Helpers):
         
         note = Note.get_by_id(_id)
       else:
-        logging.debug('Initializing new note...')
         note = Note()
         note.uuid = str(uuid.uuid4())
         note.author = users.get_current_user()
@@ -220,7 +217,7 @@ class CreateHandler(webapp.RequestHandler, Helpers):
       note.tags = map(db.Category, tags)
       
       note.put()
-      logging.debug('Post created: %s' % note.title)
+      logging.debug('New note: %s' % note.title)
       
       template_vars = {
         'entry': note, 
@@ -273,7 +270,6 @@ class DeleteHandler(webapp.RequestHandler, Helpers):
 class CommentHandler(webapp.RequestHandler, Helpers):
   """ Will add a comment """
   def post(self):
-    logging.debug('Adding a comment...')
     if users.get_current_user():
       note_id = self.request.get('note_id')
       
@@ -285,7 +281,6 @@ class CommentHandler(webapp.RequestHandler, Helpers):
           self.render_error_json(self.response, 'Unable to find a note for id: %s' % note_id)
           return
         
-        logging.debug('Ok, adding comment to: %s' % note.title)
 
         comment = Comment()
         comment.note = note
@@ -349,7 +344,7 @@ class CommentHandler(webapp.RequestHandler, Helpers):
       }
 
       user_text = self.get_html('email', user_vars, 'txt')
-      logging.debug('Sending email to %s' % recipient.email())
+      logging.debug('Sending comment mail to %s' % recipient.email())
       mail.send_mail(note.author.email(), recipient.email(), subject, user_text)
 
 
