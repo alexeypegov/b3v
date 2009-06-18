@@ -11,9 +11,11 @@ import urllib
 from time import gmtime, strftime
 
 from google.appengine.ext import db
-from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
+
+from google.appengine.api import users
+from google.appengine.api import mail
 
 from django.utils import simplejson
 from django.core.paginator import ObjectPaginator, InvalidPage
@@ -103,6 +105,13 @@ class Helpers:
   SLUGIFY_P = re.compile(r"[^\w\s-]", re.UNICODE)
   SLUGIFY_P2 = re.compile('\s+')
   SLUGIFY_P3 = re.compile('-+')
+  
+  def get_note_url_prefix(self, request):
+    url_prefix = 'http://' + request.environ['SERVER_NAME']
+    port = request.environ['SERVER_PORT']
+    if port and port != '80':
+        url_prefix += ':%s' % port
+    return url_prefix + NOTE_URL_PREFIX
     
   def slugify(self, text):
     slug = Helpers.SLUGIFY_P.sub('', text.lower())
@@ -276,7 +285,7 @@ class CommentHandler(webapp.RequestHandler, Helpers):
           self.render_error_json(self.response, 'Unable to find a note for id: %s' % note_id)
           return
         
-        logging.debug('Ok, adding the comment to: %s' % note.title)
+        logging.debug('Ok, adding comment to: %s' % note.title)
 
         comment = Comment()
         comment.note = note
@@ -284,12 +293,65 @@ class CommentHandler(webapp.RequestHandler, Helpers):
         comment.content = self.request.get('comment')
 
         comment.put()
-
+        
+        self.email_comment(self.request, note, comment)
         self.render_json_a(self.response, 'comments', {'comments': [comment]})
       except ValueError:
         self.render_error_json(self.response, 'Unable to parse note id: %i' % _id)
     else:
       self.render_error_json(self.response, 'Login to be able to post comments!')
+  
+  """ e-mail comment to admin & to recepient(s) if specified """
+  def email_comment(self, request, note, comment):
+    comments = Note.get_comments(note)
+    authors = {}
+    for c in comments:
+      nick = c.author.nickname()
+      if nick not in authors:
+        at_char = nick.find('@')
+        if at_char > 0:
+          nick = nick[0:at_char]
+        authors[nick] = c.author
+    
+    to = []
+    if len(authors):
+      # will find all the recipients of the comment
+      text = comment.content.encode('utf-8')
+      parts = text.split(' ')
+      for part in parts:
+        word = part.strip()
+        if len(word) and word[0] == '@':
+          ref = word[1:len(word)]
+          if ref in authors:
+            to.append(authors[ref])
+    
+    note_url = self.get_note_url_prefix(request) + note.encoded_slug()
+    subject = self.get_html('email_subject', {'from': comment.author.nickname()}, 'txt')
+    
+    # send a copy to notes author if he's not commenter or not in 'to' list
+    if (comment.author != note.author) and (note.author not in to):
+      admin_vars = {
+        'comment': comment,
+        'note': note,
+        'url': note_url
+      }
+      
+      admin_text = self.get_html('admin_email', admin_vars, 'txt')
+      logging.debug('Sending mail to %s (admin)' % note.author.email())
+      mail.send_mail(note.author.email(), note.author.email(), subject, admin_text)
+    
+    for recipient in to:
+      user_vars = {
+        'comment': comment,
+        'note': note,
+        'to': recipient.nickname(),
+        'url': note_url
+      }
+
+      user_text = self.get_html('email', user_vars, 'txt')
+      logging.debug('Sending email to %s' % recipient.email())
+      mail.send_mail(note.author.email(), recipient.email(), subject, user_text)
+
 
 class FetchCommentsHandler(webapp.RequestHandler, Helpers):
   """ Will return comments for the given note """
@@ -330,14 +392,8 @@ class FeedHandler(webapp.RequestHandler, Helpers):
       updated = None
       recent = None
     
-    url_prefix = 'http://' + self.request.environ['SERVER_NAME']
-    port = self.request.environ['SERVER_PORT']
-    if port and port != '80':
-        url_prefix += ':%s' % port
-    url_prefix += NOTE_URL_PREFIX
-    
-    self.render(self.response, 'atom', {'entries': recent, 'updated': updated, 'prefix': url_prefix}, ext = 'xml')
-    
+    self.render(self.response, 'atom', {'entries': recent, 'updated': updated, 'prefix': self.get_note_url_prefix(self.request)}, ext = 'xml')
+
 
 class FaqHandler(webapp.RequestHandler, Helpers):
   """ Will generate FAQ page """
