@@ -330,6 +330,12 @@ h2.lf {
   color: #999;
 }
 
+.c .m {
+  font-size: 87.5%;
+  color: #aaa;
+  padding-top: 0.5em;
+}
+
 /*** PAGING ***/
 
 #paging {

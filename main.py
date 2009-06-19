@@ -289,8 +289,13 @@ class CommentHandler(webapp.RequestHandler, Helpers):
 
         comment.put()
         
-        self.email_comment(self.request, note, comment)
-        self.render_json_a(self.response, 'comments', {'comments': [comment]})
+        recipients = self.email_comment(self.request, note, comment)
+        names = ''
+        for r in recipients:
+          names += '%s, ' % r.nickname()
+        names = names.strip(" ,")
+        
+        self.render_json_a(self.response, 'comments', {'comments': [comment], 'recipients': names})
       except ValueError:
         self.render_error_json(self.response, 'Unable to parse note id: %i' % _id)
     else:
@@ -315,7 +320,7 @@ class CommentHandler(webapp.RequestHandler, Helpers):
       parts = text.split(' ')
       for part in parts:
         word = part.strip()
-        if len(word) and word[0] == '@':
+        if word and word[0] == '@':
           ref = word[1:len(word)]
           if ref in authors:
             to.append(authors[ref])
@@ -333,7 +338,8 @@ class CommentHandler(webapp.RequestHandler, Helpers):
       
       admin_text = self.get_html('admin_email', admin_vars, 'txt')
       logging.debug('Sending mail to %s (admin)' % note.author.email())
-      mail.send_mail(note.author.email(), note.author.email(), subject, admin_text)
+      try: mail.send_mail(note.author.email(), note.author.email(), subject, admin_text)
+      except: pass
     
     for recipient in to:
       user_vars = {
@@ -345,8 +351,10 @@ class CommentHandler(webapp.RequestHandler, Helpers):
 
       user_text = self.get_html('email', user_vars, 'txt')
       logging.debug('Sending comment mail to %s' % recipient.email())
-      mail.send_mail(note.author.email(), recipient.email(), subject, user_text)
+      try: mail.send_mail(note.author.email(), recipient.email(), subject, user_text)
+      except: pass
 
+    return to
 
 class FetchCommentsHandler(webapp.RequestHandler, Helpers):
   """ Will return comments for the given note """
@@ -357,7 +365,8 @@ class FetchCommentsHandler(webapp.RequestHandler, Helpers):
       _id = int(note_id)
 
       template_vars = {
-        'comments': Note.get_comments(_id)
+        'comments': Note.get_comments(_id),
+        'recipients': None
       }
 
       self.render_json_a(self.response, 'comments', template_vars)
@@ -381,7 +390,7 @@ class FeedHandler(webapp.RequestHandler, Helpers):
   def get(self):
     self.response.headers['Content-Type'] = 'application/atom+xml'
     recent = Note.get_recent()
-    if len(recent):
+    if recent:
       updated = recent[0].w3cdtf()
     else:
       updated = None
