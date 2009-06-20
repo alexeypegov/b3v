@@ -43,6 +43,12 @@ class Note(db.Model):
   
   def w3cdtf(self):
     return self.created_at.strftime("%Y-%m-%dT%H:%M:%SZ")
+    
+  def newer(self):
+    return db.Query(Note).filter("created_at >", self.created_at).order('created_at').get()
+  
+  def older(self):
+    return db.Query(Note).filter("created_at <", self.created_at).order('-created_at').get()
 
   @classmethod
   def get_by_slug(cls, slug):
@@ -394,8 +400,8 @@ class NoteHandler(webapp.RequestHandler, Helpers):
       self.error(404)
       self.render(self.response, '404')
       return
-
-    self.render_a(self.response, 'single-note', { 'entry': note })
+      
+    self.render_a(self.response, 'single-note', { 'entry': note, 'older': note.older(), 'newer': note.newer() })
 
 class PermLinkHandler(webapp.RequestHandler, Helpers):
   """ Will show a query by it's permlink """
