@@ -24,4 +24,25 @@ def comment_text(body):
   except ValueError:
     return "Not an INT value!"
   
+def localize_date(date):
+  """ Localize date """
+  months = {
+    1: 'Января',
+    2: 'Февраля',
+    3: 'Марта',
+    4: 'Апреля',
+    5: 'Мая',
+    6: 'Июня',
+    7: 'Июля',
+    8: 'Августа',
+    9: 'Сентября',
+    10: 'Октября',
+    11: 'Ноября',
+    12: 'Декабря'
+  }
+  
+  
+  return '%i %s %i' % (date.day, months[date.month], date.year)
+
 register.filter(comment_text)
+register.filter(localize_date)
