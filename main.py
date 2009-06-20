@@ -26,6 +26,7 @@ webapp.template.register_template_library('filters')
 IPP = 10
 TEMPLATES_PATH = 'view'
 NOTE_URL_PREFIX = '/note/'
+PERMLINK_PREFIX = '/permlink/'
 
 class Note(db.Model):
   author = db.UserProperty()
@@ -46,8 +47,12 @@ class Note(db.Model):
   @classmethod
   def get_by_slug(cls, slug):
     decoded_slug = urllib.unquote(slug).decode('utf8')
-    return db.Query(Note).filter("slug =", decoded_slug).get()
+    return db.Query(Note).filter("slug =", decoded_slug).order('-created_at').get()
     
+  @classmethod
+  def get_by_uid(cls, uid):
+    return db.Query(Note).filter("uuid =", uid).get()
+
   @classmethod
   def count(cls):
     return db.Query(Note).count()
@@ -111,6 +116,13 @@ class Helpers:
     if port and port != '80':
         url_prefix += ':%s' % port
     return url_prefix + NOTE_URL_PREFIX
+    
+  def get_permlink_prefix(self, request):
+    url_prefix = 'http://' + request.environ['SERVER_NAME']
+    port = request.environ['SERVER_PORT']
+    if port and port != '80':
+      url_prefix += ':%s' % port
+    return url_prefix + PERMLINK_PREFIX
     
   def slugify(self, text):
     slug = Helpers.SLUGIFY_P.sub('', text.lower())
@@ -385,6 +397,18 @@ class NoteHandler(webapp.RequestHandler, Helpers):
 
     self.render_a(self.response, 'single-note', { 'entry': note })
 
+class PermLinkHandler(webapp.RequestHandler, Helpers):
+  """ Will show a query by it's permlink """
+  def get(self, uid):
+    note = Note.get_by_uid(uid)
+    if not note:
+      logging.debug('Note for UID %s was not found' % uid)
+      self.error(404)
+      self.render(self.response, '404')
+      return
+    
+    self.redirect(self.get_note_url_prefix(self.request) + note.encoded_slug())
+
 class FeedHandler(webapp.RequestHandler, Helpers):
   """ Will generate a RSS feed """
   def get(self):
@@ -396,7 +420,7 @@ class FeedHandler(webapp.RequestHandler, Helpers):
       updated = None
       recent = None
     
-    self.render(self.response, 'atom', {'entries': recent, 'updated': updated, 'prefix': self.get_note_url_prefix(self.request)}, ext = 'xml')
+    self.render(self.response, 'atom', {'entries': recent, 'updated': updated, 'prefix': self.get_permlink_prefix(self.request)}, ext = 'xml')
 
 
 class FaqHandler(webapp.RequestHandler, Helpers):
@@ -426,6 +450,7 @@ def main():
     (r'/add-comment', CommentHandler),
     (r'/fetch-comments', FetchCommentsHandler),
     (r'/note/([^/]+)', NoteHandler),
+    (r'/permlink/([^/]+)', PermLinkHandler),
     (r'/edit/([\d]+)', EditHandler),
     (r'/delete', DeleteHandler),
     (r'/feed', FeedHandler),

@@ -18,7 +18,7 @@
  {% for entry in entries %}
  <entry>
    <title>{{ entry.title }}</title>
-   <link rel="alternate" type="text/html" href="{{ prefix }}{{ entry.slug }}"/>
+   <link rel="alternate" type="text/html" href="{{ prefix }}{{ entry.uuid }}"/>
    <id>urn:uuid:{{ entry.uuid }}</id>
    <updated>{{ entry.w3cdtf }}</updated>
    <content type="html">{{ entry.content|escape }}</content>
