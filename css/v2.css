@@ -23,6 +23,7 @@ input[type=text] {
 
 img {
   border: 0;
+  padding: 0.5em 0;
 }
 
 .lf {
