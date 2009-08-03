@@ -7,6 +7,7 @@ import string
 import logging
 import wsgiref.handlers
 import urllib
+import cgi
 
 from time import gmtime, strftime
 
@@ -14,6 +15,7 @@ from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 
+from google.appengine.api import memcache
 from google.appengine.api import users
 from google.appengine.api import mail
 
@@ -27,6 +29,7 @@ IPP = 10
 TEMPLATES_PATH = 'view'
 NOTE_URL_PREFIX = '/note/'
 PERMLINK_PREFIX = '/permlink/'
+URL_PATTERN = re.compile(r"((^| )+http://[^ ]+)")
 
 class Note(db.Model):
   author = db.UserProperty()
@@ -303,7 +306,9 @@ class CommentHandler(webapp.RequestHandler, Helpers):
         comment = Comment()
         comment.note = note
         comment.author = users.get_current_user()
-        comment.content = self.request.get('comment')
+        
+        escaped = cgi.escape(self.request.get('comment')).encode('ascii', 'xmlcharrefreplace')
+        comment.content = URL_PATTERN.sub(r'<a href="\1">\1</a>', escaped)
 
         comment.put()
         

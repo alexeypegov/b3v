@@ -1,5 +1,5 @@
 {% for comment in comments %}
-<div class="c"><span>{{ comment.content|escape }}</span><span class="author ll">&nbsp;&#151;&nbsp;{{ comment.author.nickname }}</span>{% if recipients %}<div class="m">Отправлено на мыло: {{ recipients }}</div>{% endif %}</div>
+<div class="c"><span>{{ comment.content }}</span><span class="author ll">&nbsp;&#151;&nbsp;{{ comment.author.nickname }}</span>{% if recipients %}<div class="m">Отправлено на мыло: {{ recipients }}</div>{% endif %}</div>
 {% endfor %}
 {% if user %}
 <div class="c add ll"><a href="#" class="l_comment">Добавить комментарий</a></div>

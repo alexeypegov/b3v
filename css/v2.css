@@ -266,6 +266,16 @@ h2.lf {
   border-bottom: 1px solid #fff;
 }
 
+.cwl .cs .c a {
+  color: #7070CC;
+  text-decoration: none;
+}
+
+.cwl .cs .c a:hover {
+  color: blue;
+  text-decoration: underline;
+}
+
 .cwl .cs .c .a {
   color: #777;
 }
