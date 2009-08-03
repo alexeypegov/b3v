@@ -1,6 +1,6 @@
 '{{ comment.author.nickname }}' оставил комментарий к заметке "{{ note.title }}":
 
-{{ comment.content }}
+{{ text }}
 
 Адрес заметки: {{ url }}
 

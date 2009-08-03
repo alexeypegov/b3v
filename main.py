@@ -312,7 +312,7 @@ class CommentHandler(webapp.RequestHandler, Helpers):
 
         comment.put()
         
-        recipients = self.email_comment(self.request, note, comment)
+        recipients = self.email_comment(self.request, note, comment, self.request.get('comment'))
         names = ''
         for r in recipients:
           names += '%s, ' % r.nickname()
@@ -325,7 +325,7 @@ class CommentHandler(webapp.RequestHandler, Helpers):
       self.render_error_json(self.response, 'Login to be able to post comments!')
   
   """ e-mail comment to admin & to recepient(s) if specified """
-  def email_comment(self, request, note, comment):
+  def email_comment(self, request, note, comment, original_text):
     comments = Note.get_comments(note)
     authors = {}
     for c in comments:
@@ -356,7 +356,8 @@ class CommentHandler(webapp.RequestHandler, Helpers):
       admin_vars = {
         'comment': comment,
         'note': note,
-        'url': note_url
+        'url': note_url,
+        'text': original_text
       }
       
       admin_text = self.get_html('admin_email', admin_vars, 'txt')
@@ -369,7 +370,8 @@ class CommentHandler(webapp.RequestHandler, Helpers):
         'comment': comment,
         'note': note,
         'to': recipient.nickname(),
-        'url': note_url
+        'url': note_url,
+        'text': original_text
       }
 
       user_text = self.get_html('email', user_vars, 'txt')
