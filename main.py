@@ -307,7 +307,7 @@ class CommentHandler(webapp.RequestHandler, Helpers):
         comment.note = note
         comment.author = users.get_current_user()
         
-        escaped = cgi.escape(self.request.get('comment')).encode('ascii', 'xmlcharrefreplace')
+        escaped = cgi.escape(self.request.get('comment'))
         comment.content = URL_PATTERN.sub(r'<a href="\1">\1</a>', escaped)
 
         comment.put()
