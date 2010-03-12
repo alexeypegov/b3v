@@ -5,7 +5,18 @@
 import logging
 import inspect
 
+from google.appengine.api import users
 from django.utils import simplejson
+
+from model import Note
+
+def admin(fn):
+  def new(*args, **kwargs):
+    if not users.is_current_user_admin():
+      return {'status': False, 'error': 'Forbidden'}
+    return fn(*args, **kwargs)
+  new.__original__ = fn
+  return new
 
 class Command(object):
   def __init__(self):
@@ -22,7 +33,7 @@ class Command(object):
     return self.fun(*args)
     
   def get_attrs(self):
-    argspec = inspect.getargspec(self.fun)
+    argspec = inspect.getargspec(self.fun.__original__ or self.fun)
     args = argspec[0]
     args.remove('self')
     return args # list of parameters
@@ -33,12 +44,19 @@ class Command(object):
       
   def error(self, msg):
     return {'status': False, 'error': msg}
-    
+
 class NoteSave(Command):
   NAME = "note:save"
-  
+
+  @admin
   def fun(self, id, text, tags, publish):
     logging.debug('text = %s, tags = %s, publish = %s' % (text, tags, publish))
+    if id != -1:
+      note = Note.get_by_id(id)
+    else:
+      note = Note()
+      note.uuid = str(uuid.uuid4())
+      # note.author = users.get_current_user()
 
 class Commands(object):
   def __init__(self):

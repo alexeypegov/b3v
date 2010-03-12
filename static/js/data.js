@@ -7,7 +7,7 @@ $.extend({
   $.post("/data", {'json': JSON.stringify(params)}, function(data) {
     $("#debug").append("<pre>response: " + $.dump(data) + "</pre>");
     if (!$.undef(data.status) && data.status == false) {
-      alert('ERRROR!!!');
+      alert(data.error);
     } else fun(data)
   }, function(start) {
     // TBD

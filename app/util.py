@@ -3,6 +3,7 @@
 # (c) Alexey Pegov (spleaner@gmail.com) 2009-2010
 #
 import os
+import logging
 
 from google.appengine.ext import webapp
 from google.appengine.api import users
@@ -26,23 +27,25 @@ class TemplateHandler(RequestHandlerEx):
   
   TEMPLATES_PATH = "templates"
   
-  def __init__(self, template_name):
+  def __init__(self, template_name, auth_template, admin_template):
     self.template_name = template_name
+    self.auth_template = auth_template
+    self.admin_template = admin_template
   
   def get(self):
-    self.render(self.template_path(self.template_name), self.wrap_data(self.prepare_data()))
+    user = users.get_current_user()
+    if users.is_current_user_admin():
+      self.render(self.template_path(self.admin_template), 
+        {'logout_url': users.create_logout_url("/"), 
+         'username': user.nickname()})
+    elif user:
+      self.render(self.template_path(self.auth_template), 
+        {'logout_url': users.create_logout_url("/"), 
+         'username': user.nickname()})
+    else: 
+      self.render(self.template_path(self.template_name), 
+        {'login_url': users.create_login_url("/")})
 
-  def wrap_data(self, data, user = False):
-    _data = { 'debug': is_dev_env() }
-    if user:
-      _data.update({'logout_url': users.create_logout_url("/")})
-    
-    _data.update(data)
-    return _data
-    
-  def prepare_data(self):
-    return {}
-    
   def _404(self):
     self.error(404)
     self.response.out.write('Page not found! // TBD')
@@ -60,7 +63,7 @@ class JSONHandler(RequestHandlerEx):
 
   def post(self):
     user = users.get_current_user()
-    data = { 'status': False }
+    data = { 'status': False, 'error': 'Forbidden' }
     if user: data = self.prepare_data(user)
     self.response.headers['Content-Type'] = 'application/json'
     simplejson.dump(data, self.response.out, ensure_ascii=False)

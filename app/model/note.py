@@ -1,5 +1,5 @@
-
-
+# (c) alexey pegov (spleaner@gmail.com) 2009-2010
+from google.appengine.ext import db
 
 class Note(db.Model):
   author = db.UserProperty()
@@ -8,6 +8,7 @@ class Note(db.Model):
   tags = db.ListProperty(db.Category)
   uuid = db.StringProperty()
   slug = db.StringProperty()
+  published = db.BooleanProperty(default=True)
   created_at = db.DateTimeProperty(auto_now_add=True)
   updated_at = db.DateTimeProperty(auto_now=True)
   

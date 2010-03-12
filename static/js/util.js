@@ -18,7 +18,7 @@ $.extend({
       global: false,
       beforeSend: function(xhr) { if (progress) progress(true) },
       success: function(msg) { callback(msg) }, 
-      error: function(request, textStatus, exception) { alert('AJAX ERROR!') },
+      error: function(request, textStatus, exception) { alert(textStatus) },
       complete: function(request, textStatus) { if (progress) progress(false) } 
     });
   },

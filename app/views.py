@@ -6,7 +6,7 @@ from commands import Commands
 
 class MainHandler(util.TemplateHandler):
   def __init__(self):
-    util.TemplateHandler.__init__(self, "main")
+    util.TemplateHandler.__init__(self, "main", "usermain", "adminmain")
     
 class DataHandler(util.JSONHandler):
   def prepare_data(self, user):
