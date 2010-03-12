@@ -1,0 +1,27 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+    <meta content='spLeanerSite' name='description' />
+    <meta content='Alexey Pegov, Pegov, Пегов, Алексей Пегов, spleaner, spleanersite' name='keywords' />
+    <title>{% block title %}Ложное движение{% endblock %}</title>
+    <link rel="icon" type="image/png" href="/i/favicon.png"/>
+    <link href='http://feeds2.feedburner.com/false-movement' rel='alternate' title='Atom' type='application/atom+xml' />
+    {% block head %}{% endblock %}
+  </head>
+  <body>
+  {% block content %}{% endblock %}
+  {% block js %}
+    {% if debug %}
+    <script src="/js/jquery-1.4.2.min.js" type="text/javascript"></script>
+    <script src="/js/jquery.dump-1.0.js" type="text/javascript"></script>
+    {% else %}
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="text/javascript"></script>
+    {% endif %}
+    <script src="/js/json2.js" type="text/javascript"></script>
+    <script src="/js/util.js?v=1" type="text/javascript"></script>
+    <script src="/js/data.js?v=1" type="text/javascript"></script>
+    {% block customjs %}{% endblock %}
+  {% endblock %}
+  </body>
+</html>
