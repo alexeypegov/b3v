@@ -1,17 +1,50 @@
 # (c) alexey pegov (spleaner@gmail.com) 2009-2010
+import logging
+import re
+
 from google.appengine.ext import db
 
+from string import strip
+
 class Note(db.Model):
-  author = db.UserProperty()
-  title = db.StringProperty()
-  content = db.TextProperty()
-  tags = db.ListProperty(db.Category)
-  uuid = db.StringProperty()
-  slug = db.StringProperty()
-  published = db.BooleanProperty(default=True)
-  created_at = db.DateTimeProperty(auto_now_add=True)
-  updated_at = db.DateTimeProperty(auto_now=True)
+  def tags_validator(value):
+    if not len(value): raise db.BadValueError, "There should be at least one single tag!"
   
+  author      = db.UserProperty(required=True, auto_current_user_add=True)
+  title       = db.StringProperty(multiline=False, required=True)
+  content     = db.TextProperty(required=True)
+  tags        = db.ListProperty(db.Category, validator=tags_validator)
+  published   = db.BooleanProperty(required=True, default=False)
+  created_at  = db.DateTimeProperty(auto_now_add=True)
+  updated_at  = db.DateTimeProperty(auto_now=True)
+  
+  @classmethod
+  def create_and_save(cls, title, content, tags, published=False):
+    _tags = map(db.Category, filter(len, map(strip, tags)))
+    slug = Note.find_unuque_slug(title)
+    note = Note(key_name=slug, title=title, content=content, tags=_tags, published=published)
+    note.put()
+    return note
+
+  @classmethod
+  def find_unuque_slug(cls, title):
+    slug = Note.slugify(title)
+    _slug, i = slug, 2
+    while True:
+      existing = Note.get_by_key_name(_slug)
+      if existing:
+        _slug = "%s-%i" % (slug, i)
+        i = i + 1
+      else:
+        break
+    return _slug
+
+  @classmethod
+  def slugify(cls, text):
+    slug = re.compile(r"[^\w\s-]", re.UNICODE).sub('', text.lower())
+    slug = re.compile('\s+').sub('-', slug)
+    return re.compile('-+').sub('-', slug)
+
   def encoded_slug(self):
     return urllib.quote(self.slug.encode('utf-8'))
   

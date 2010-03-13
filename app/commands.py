@@ -5,15 +5,16 @@
 import logging
 import inspect
 
+from google.appengine.ext import db
 from google.appengine.api import users
 from django.utils import simplejson
 
-from model import Note
+from datamanager import *
 
 def admin(fn):
   def new(*args, **kwargs):
     if not users.is_current_user_admin():
-      return {'status': False, 'error': 'Forbidden'}
+      return { 'status': False }
     return fn(*args, **kwargs)
   new.__original__ = fn
   return new
@@ -44,19 +45,19 @@ class Command(object):
       
   def error(self, msg):
     return {'status': False, 'error': msg}
+  
+  def ok(self, data):
+    _map = {'status': True}
+    _map.update(data)
+    return _map
 
 class NoteSave(Command):
   NAME = "note:save"
 
   @admin
   def fun(self, id, text, tags, publish):
-    logging.debug('text = %s, tags = %s, publish = %s' % (text, tags, publish))
-    if id != -1:
-      note = Note.get_by_id(id)
-    else:
-      note = Note()
-      note.uuid = str(uuid.uuid4())
-      # note.author = users.get_current_user()
+    note = update_or_create_note(id, text, tags, publish)
+    return self.ok({ 'id': note.key().id() })
 
 class Commands(object):
   def __init__(self):
