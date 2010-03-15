@@ -22,3 +22,24 @@
 # http://www.youtube.com/watch?a=GHJGD67I will be converted to an html with embedded player
 #
 #
+from tools import FSM
+
+class NoteProcessor(object):
+  def __init__(self):
+    pass
+  
+  def error(fsm):
+    print 'Symbol error: %s' % str(fsm.input_symbol)
+  
+class NoteParser(object):
+  def __init__(self, processor=NoteProcessor()):
+    self.fsm = FSM('INIT', processor)
+    self.fsm.set_default_transition('error', 'INIT')
+    self.fsm.add_transition_any ('INIT', 'append', 'INIT')
+    self.fsm.add_transition('\n', 'INIT', 'string', 'INIT')
+    self.fsm.add_transition('-', 'INIT', 'hyphen', 'INIT')
+  
+  def parse(self, text):
+    self.fsm.process_list(text)
+
+  

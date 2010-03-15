@@ -45,6 +45,10 @@ class Note(db.Model):
     slug = re.compile('\s+').sub('-', slug)
     return re.compile('-+').sub('-', slug)
 
+  #
+  # THE CODE BELOW SHOULD BE REVIEWED
+  #
+  
   def encoded_slug(self):
     return urllib.quote(self.slug.encode('utf-8'))
   
