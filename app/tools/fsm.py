@@ -11,7 +11,7 @@ class FSMException(Exception):
 class FSM(object):
   """ Finite-State Machine """
   
-  def __init__(self, initial, processor, memory=[]):
+  def __init__(self, initial, processor):
     self.state_transitions = {}
     self.state_any = {}
     self.state_empty = {}
@@ -23,7 +23,6 @@ class FSM(object):
     self.current_state = initial
     self.next_state = None
     self.action = None
-    self.memory = memory
   
   def reset(self):
     self.current_state = self.initial_state
@@ -77,3 +76,6 @@ class FSM(object):
   def process_list(self, input_symbols):
     for s in input_symbols:
       self.process(s)
+      
+    # EOF
+    getattr(self.processor, 'eof')(self)
