@@ -36,8 +36,11 @@ class NoteParser(object):
     self.fsm = FSM('INIT', processor)
     self.fsm.set_default_transition('error', 'INIT')
     self.fsm.add_transition_any ('INIT', 'append', 'INIT')
-    self.fsm.add_transition('\n', 'INIT', 'string', 'INIT')
-    self.fsm.add_transition('-', 'INIT', 'hyphen', 'INIT')
+    self.fsm.add_transition('\n', 'INIT', 'para', 'INIT')
+    self.fsm.add_transition('-', 'INIT', 'style', 'INIT')
+    self.fsm.add_transition('*', 'INIT', 'style', 'INIT')
+    self.fsm.add_transition('_', 'INIT', 'style', 'INIT')
+    self.fsm.add_transition('#', 'INIT', 'style', 'INIT')
   
   def parse(self, text):
     self.fsm.process_list(text)
