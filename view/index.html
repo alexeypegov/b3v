@@ -1,7 +1,5 @@
 {% extends "layout.html" %}
 
-{% block title %}{% ifnotequal prev -1 %}{{ page }} страница из {{ total }} - {% endifnotequal %}{% endblock %}
-
 {% block content %}
 {% ifnotequal prev -1 %}
 <div id='nav' class="ll"><a href="/">&larr; Хоум</a></div>

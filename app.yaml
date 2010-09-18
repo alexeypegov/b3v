@@ -4,18 +4,21 @@ runtime: python
 api_version: 1
 
 handlers:
+- url: /css
+  static_dir: static/css/
+
 - url: /i
-  static_dir: static/i
+  static_dir: static/i/
+
+- url: /favicon.ico
+  static_files: i/favicon.ico
+  upload: i/favicon.ico
 
 - url: /js
-  static_dir: static/js
+  static_dir: static/js/
 
-- url: /css
-  static_dir: static/css
+- url: /s
+  static_dir: static/
 
-- url: /_ereporter/.*
-  script: $PYTHON_LIB/google/appengine/ext/ereporter/report_generator.py
-  login: admin
-
-- url: .*
+- url: /.*
   script: main.py

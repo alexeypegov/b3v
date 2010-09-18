@@ -254,7 +254,7 @@ h2.lf {
   height: 16px;
   width: 10%;
   margin-left: 1em;
-  background: #fff url('/i/arrow.png') no-repeat;
+  background: #fff url('/i/a.png') no-repeat;
 }
 
 .cwl .cs {
@@ -304,14 +304,14 @@ h2.lf {
   height: 16px;
   width: 10%;
   margin-left: 1em;
-  background: #fff url('/i/arrow2.png') no-repeat;
+  background: #fff url('/i/a2.png') no-repeat;
 }
 
 .cw .ba {
   height: 16px;
   width: 10%;
   margin-left: 1em;
-  background: #fff url('/i/arrow.png') no-repeat;
+  background: #fff url('/i/a.png') no-repeat;
 }
 
 .cw .g {

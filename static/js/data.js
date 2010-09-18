@@ -5,7 +5,7 @@ $.extend({
   params['name'] = cmd;
   // $("#debug").html("<pre>queue: " + $.dump(params) + "</pre>");
   $.post("/data", {'json': JSON.stringify(params)}, function(data) {
-    $("#debug").append("<pre>response: " + $.dump(data) + "</pre>");
+    // $("#debug").append("<pre>response: " + $.dump(data) + "</pre>");
     if (!$.undef(data.status) && data.status == false) {
       alert(data.error);
     } else fun(data)
