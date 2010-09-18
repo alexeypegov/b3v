@@ -377,3 +377,13 @@ h2.lf {
 #static p {
   color: #222;
 }
+
+a.l_more {
+  color: #7070CC;
+  text-decoration: none;
+}
+
+a.l_more:hover {
+  color: blue;
+  text-decoration: underline;
+}

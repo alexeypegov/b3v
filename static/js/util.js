@@ -7,30 +7,7 @@ $.extend({
   
   undefv: function(E, D) {
     return $.undef(E) ? D : E;
-  },
-  
-  _ajax: function(url, type, data, callback, progress) {
-    $.ajax({
-      type: type, 
-      url: url, 
-      dataType: "json", 
-      data: (data), 
-      global: false,
-      beforeSend: function(xhr) { if (progress) progress(true) },
-      success: function(msg) { callback(msg) }, 
-      error: function(request, textStatus, exception) { alert(textStatus) },
-      complete: function(request, textStatus) { if (progress) progress(false) } 
-    });
-  },
-  
-  get: function(url, data, callback, progress) {
-    $._ajax(url, "GET", data, callback, progress);
-  },
-  
-  post: function(url, data, callback, progress) {
-    $._ajax(url, "POST", data, callback, progress);
   }
-  
 });
 
 _ = function(text, content) {

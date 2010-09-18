@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+# coding=utf-8
 import os
 import re
 import uuid
@@ -8,17 +8,18 @@ import logging
 import wsgiref.handlers
 import urllib
 import cgi
+import xmlrpclib
 
 from time import gmtime, strftime
 
 from google.appengine.ext import db
 from google.appengine.ext import webapp
+from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext.webapp import template
 
 from google.appengine.api import memcache
 from google.appengine.api import users
 from google.appengine.api import mail
-
 from django.utils import simplejson
 from django.core.paginator import ObjectPaginator, InvalidPage
 
@@ -33,11 +34,11 @@ URL_PATTERN = re.compile(r"((^| )+http://[^ ]+)")
 
 class Note(db.Model):
   author = db.UserProperty()
-  title = db.StringProperty()
+  title = db.StringProperty(multiline=False)
   content = db.TextProperty()
   tags = db.ListProperty(db.Category)
-  uuid = db.StringProperty()
-  slug = db.StringProperty()
+  uuid = db.StringProperty(multiline=False)
+  slug = db.StringProperty(multiline=False)
   created_at = db.DateTimeProperty(auto_now_add=True)
   updated_at = db.DateTimeProperty(auto_now=True)
   
@@ -67,22 +68,15 @@ class Note(db.Model):
     return db.Query(Note).count()
     
   @classmethod
-  def get_page(cls, page = 0):
-    if Note.count() > page * IPP:
-      return db.Query(Note).order('-created_at').fetch(IPP, page * IPP)
-    return None
+  def get_notes(cls, key=None):
+    if key:
+      return db.Query(Note).filter("__key__ < ", key).order('-__key__').fetch(IPP + 1)
+    return db.Query(Note).order('-created_at').fetch(IPP + 1)
     
   @classmethod
   def get_recent(cls, count = 10):
     return db.Query(Note).order('-created_at').fetch(10)
     
-  @classmethod
-  def next_page(cls, page = 0):
-    if Note.count() >= (page + 1) * IPP + 1:
-      return page + 1
-    else:
-      return None
-  
   def sorted_comments(self):
     return Note.get_comments(self);
   
@@ -97,7 +91,7 @@ class Note(db.Model):
     if not note:
       return []
     else:
-      return db.GqlQuery("SELECT * FROM Comment WHERE note = :1 ORDER BY created_at", note)
+      return db.Query(Comment).filter("note = ", note).order('created_at')
 
 class Comment(db.Model):
   note = db.ReferenceProperty(Note, collection_name='comments')
@@ -107,10 +101,7 @@ class Comment(db.Model):
   
   @classmethod
   def delete_for_note(cls, note):
-    comments = db.Query(Comment).filter('note = ', note)
-    for comment in comments:
-      logging.debug('Deleting a comment: %s' % comment.content)
-      comment.delete()
+    db.delete(map(lambda c: c.key(), db.Query(Comment).filter('note = ', note)))
   
 class Helpers:
   """ Just a helper methods """
@@ -163,44 +154,77 @@ class Helpers:
     logging.debug(msg)
     self.render_simple_json(response, {'status': False, 'msg': msg})
     
-  def render_a(self, response, template_name, _vars = {}):
-    self.render(response, template_name, self.add_auth_info(_vars))
+  def user_kind(self):
+    user = users.get_current_user()  
+    if user:
+      return users.is_current_user_admin() and 'admin' or 'auth'
+    else:
+      return 'plain'
+  
+  def mod_count(self):
+    value = memcache.get('modification_count')
+    return 0 if value is None else int(value)
     
-  def add_auth_info(self, _vars = {}):
+  def inc_count(self):
+    memcache.incr('modification_count', initial_value = 0)
+  
+  def get_cached(self, key, namespace=None):
+    v = memcache.get(key, namespace=namespace)
+    if v:
+      logging.debug('Cached for %s [%s == %s]' % (key, str(v[1]), str(self.mod_count())))
+      return v[1] == self.mod_count() and v[0] or None
+    return None
+    
+  def repl_auth_block(self, _s):
     user = users.get_current_user()
     if user:
       url = users.create_logout_url(self.request.uri)
+      s = "%s&nbsp;|&nbsp;<a href=\"%s\">Выйти</a>" % (user.nickname(), url)
+      if users.is_current_user_admin():
+        s += "&nbsp;|&nbsp;<a href=\"#\" class=\"l_create\">Написать</a>"
+      return _s.replace("{*auth_block*}", s)
     else:
       url = users.create_login_url(self.request.uri)
-    
-    _tmp = {
-      'admin': users.is_current_user_admin(),
-      'url': url,
-      'user': user,
-      'total_notes': Note.count()
-    }
-    
-    _tmp.update(_vars)
-    return _tmp
-    
+      return _s.replace("{*auth_block*}", "<a href=\"%s\">Войти</a>" % url)
+      
 class MainHandler(webapp.RequestHandler, Helpers):
   """ Handles index page """
-  def get(self, page = 0):
-    try:
-      page = int(page)
-    except ValueError:
-      page = 0
-    
-    entries = Note.get_page(page)
-    template_values = {
-      'entries': entries,
-      'next': Note.next_page(page),
-      'prev': page - 1 if entries != None else -1,
-      'page': page + 1,
-      'total': Note.count() / IPP + 1
-    }
+  def get(self):
+    kind = self.user_kind()
+    cache_key = 'index-%s' % kind
+    cached = self.get_cached(cache_key, namespace='pages')
+    if not cached:
+      entries = Note.get_notes()
+      template_values = {
+        'entries': entries[:-1],
+        'next': (len(entries) == IPP + 1) and str(entries[-2].key()) or False,
+        'admin': kind == 'admin',
+        'user': kind in ('admin', 'auth')
+      }
+      
+      cached = self.get_html('index', template_values)
+      memcache.set(cache_key, (cached, self.mod_count()), 3600 * 12, namespace='pages')
+    self.response.out.write(self.repl_auth_block(cached))
 
-    self.render_a(self.response, 'index', template_values)
+class MoreHandler(webapp.RequestHandler, Helpers):
+  def post(self):
+    str_key = self.request.get('key')
+    kind = self.user_kind()
+    cache_key = "%s-%s" % (str_key, kind)
+    cached = self.get_cached(cache_key, namespace='next')
+    if not cached:
+      key = db.Key(encoded=str_key)
+      entries = Note.get_notes(key)
+      template_values = {
+        'entries': entries,
+        'next': (len(entries) == IPP + 1) and str(entries[-2].key()) or False,
+        'admin': kind == 'admin',
+        'user': kind in ('admin', 'auth')
+      }
+      
+      cached = self.get_html('more', template_values)
+      memcache.set(cache_key, (cached, self.mod_count()), 3600 * 12, namespace = 'next')
+    self.render_simple_json(self.response, {'html': cached})
 
 class NewHandler(webapp.RequestHandler, Helpers):
   """ Will send a create form """
@@ -238,6 +262,10 @@ class CreateHandler(webapp.RequestHandler, Helpers):
       note.tags = map(db.Category, tags)
       
       note.put()
+      self.inc_count()
+      
+      self.ping_feedburner(self.request);
+      
       logging.debug('New note: %s' % note.title)
       
       template_vars = {
@@ -245,9 +273,18 @@ class CreateHandler(webapp.RequestHandler, Helpers):
         'admin': users.is_current_user_admin()
       }
       
-      self.render_json_a(self.response, 'note', template_vars)
+      self.render_json(self.response, 'note', template_vars)
     else:
       self.render_error_json(self.response, 'Unable to create a post: user is not an admin')
+
+  def ping_feedburner(self, req):
+    if not is_dev_env():
+      rpc = xmlrpclib.Server('http://ping.feedburner.google.com/')
+      url = 'http://' + req.environ['SERVER_NAME']
+      port = req.environ['SERVER_PORT']
+      if port and port != '80':
+          url += ':%s' % port
+      rpc.weblogUpdates.ping("Ложное движение", url)
 
 class EditHandler(webapp.RequestHandler, Helpers):
   """ Edit note """
@@ -282,6 +319,7 @@ class DeleteHandler(webapp.RequestHandler, Helpers):
           
         Comment.delete_for_note(note)
         note.delete()
+        self.inc_count()
         self.render_simple_json(self.response, {'status': True})
       except ValueError:
         self.render_error_json(self.response, 'Unable to parse note id: %i' % _id)
@@ -302,7 +340,6 @@ class CommentHandler(webapp.RequestHandler, Helpers):
           self.render_error_json(self.response, 'Unable to find a note for id: %s' % note_id)
           return
         
-
         comment = Comment()
         comment.note = note
         comment.author = users.get_current_user()
@@ -311,6 +348,7 @@ class CommentHandler(webapp.RequestHandler, Helpers):
         comment.content = URL_PATTERN.sub(r'<a href="\1">\1</a>', escaped)
 
         comment.put()
+        self.inc_count()
         
         recipients = self.email_comment(self.request, note, comment, self.request.get('comment'))
         names = ''
@@ -318,7 +356,7 @@ class CommentHandler(webapp.RequestHandler, Helpers):
           names += '%s, ' % r.nickname()
         names = names.strip(" ,")
         
-        self.render_json_a(self.response, 'comments', {'comments': [comment], 'recipients': names})
+        self.render_json(self.response, 'comments', {'comments': [comment], 'recipients': names, 'user': self.user_kind() in ('admin', 'auth')})
       except ValueError:
         self.render_error_json(self.response, 'Unable to parse note id: %i' % _id)
     else:
@@ -378,7 +416,6 @@ class CommentHandler(webapp.RequestHandler, Helpers):
       logging.debug('Sending comment mail to %s' % recipient.email())
       try: mail.send_mail(note.author.email(), recipient.email(), subject, user_text)
       except: pass
-
     return to
 
 class FetchCommentsHandler(webapp.RequestHandler, Helpers):
@@ -388,27 +425,42 @@ class FetchCommentsHandler(webapp.RequestHandler, Helpers):
     
     try:
       _id = int(note_id)
+      
+      cache_key = 'comments-%s' % _id
+      cached = self.get_cached(cache_key, namespace="comments")
+      if not cached:
+        cached = Note.get_comments(_id)
+        memcache.set(cache_key, (cached, self.mod_count()), 12 * 3600, namespace="comments")
 
       template_vars = {
-        'comments': Note.get_comments(_id),
-        'recipients': None
+        'comments': cached,
+        'recipients': None,
+        'user': self.user_kind() in ('admin', 'auth')
       }
 
-      self.render_json_a(self.response, 'comments', template_vars)
+      # todo: cache resulting html
+      self.render_json(self.response, 'comments', template_vars)
     except ValueError:
       self.render_error_json(self.response, 'Unable to parse note id: %s' % note_id)
 
 class NoteHandler(webapp.RequestHandler, Helpers):
   """ Will show a certain note """
   def get(self, slug):
-    note = Note.get_by_slug(urllib.unquote(slug))
-    if not note:
-      logging.debug('Note for slug: %s was not found' % slug)
-      self.error(404)
-      self.render(self.response, '404')
-      return
+    _slug = urllib.unquote(slug)
+    kind = self.user_kind()
+    cache_key = 'note-%s-%s' % (_slug, kind)
+    cached = self.get_cached(cache_key, namespace="note")
+    if not cached:
+      note = Note.get_by_slug(_slug)
+      if not note:
+        logging.debug('Note for slug: %s was not found' % slug)
+        self.error(404)
+        self.render(self.response, '404')
+        return
       
-    self.render_a(self.response, 'single-note', { 'entry': note, 'older': note.older(), 'newer': note.newer() })
+      cached = self.get_html('single-note', { 'entry': note, 'older': note.older(), 'newer': note.newer(), 'user': kind in ('admin', 'auth'), 'admin': kind == 'admin' })
+      memcache.set(cache_key, (cached, self.mod_count()), 3600 * 12, namespace="note")      
+    self.response.out.write(self.repl_auth_block(cached))
 
 class PermLinkHandler(webapp.RequestHandler, Helpers):
   """ Will show a query by it's permlink """
@@ -426,15 +478,17 @@ class FeedHandler(webapp.RequestHandler, Helpers):
   """ Will generate a RSS feed """
   def get(self):
     self.response.headers['Content-Type'] = 'application/atom+xml'
-    recent = Note.get_recent()
-    if recent:
-      updated = recent[0].w3cdtf()
-    else:
-      updated = None
-      recent = None
-    
-    self.render(self.response, 'atom', {'entries': recent, 'updated': updated, 'prefix': self.get_permlink_prefix(self.request)}, ext = 'xml')
-
+    cached = self.get_cached('feed')
+    if not cached:
+      recent = Note.get_recent()
+      if recent:
+        updated = recent[0].w3cdtf()
+      else:
+        updated = None
+        recent = None
+      cached = self.get_html('atom', {'entries': recent, 'updated': updated, 'prefix': self.get_permlink_prefix(self.request)}, ext = 'xml')
+      memcache.set('feed', (cached, self.mod_count()), 12 * 3600)
+    self.response.out.write(cached)
 
 class FaqHandler(webapp.RequestHandler, Helpers):
   """ Will generate FAQ page """
@@ -457,8 +511,9 @@ def main():
     logging.getLogger().setLevel(logging.DEBUG)
   
   application = webapp.WSGIApplication([
-    (r'/([\d]*)', MainHandler),
+    (r'/', MainHandler),
     (r'/new', NewHandler),
+    (r'/more', MoreHandler),
     (r'/create', CreateHandler),
     (r'/add-comment', CommentHandler),
     (r'/fetch-comments', FetchCommentsHandler),
@@ -470,8 +525,9 @@ def main():
     (r'/faq', FaqHandler),
     (r'/.*', NotFoundPageHandler)
     ], debug=is_dev_env())
-    
-  wsgiref.handlers.CGIHandler().run(application)
+  
+  run_wsgi_app(application)  
+  # wsgiref.handlers.CGIHandler().run(application)
 
 
 if __name__ == '__main__':

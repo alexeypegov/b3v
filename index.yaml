@@ -26,3 +26,14 @@ indexes:
   - name: note
   - name: date
     direction: desc
+
+- kind: Note
+  properties:
+  - name: __key__
+    direction: desc
+
+- kind: Note
+  properties:
+  - name: slug
+  - name: created_at
+    direction: desc

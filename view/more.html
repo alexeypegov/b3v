@@ -1,0 +1,6 @@
+{% for entry in entries %}
+{% include "note.html" %}
+{% endfor %}
+{% if next %}
+<div id="nav"><a href="#" class="l_next" data-next-key="{{ next }}">Еще</a></div>
+{% endif %}

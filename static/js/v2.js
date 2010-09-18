@@ -283,7 +283,7 @@ clickHandlers.comment = function(e) {
   var cw = N.find(".cw");
   if (cw.length) {
     cw.hide();
-    var t = $('<div class="cwl"><div class="ba"></div><div class="cs"><div class="c commentform"></div></div></div>');
+    var t = $(_('.cwl', _('.ba', '') + _('.cs', _('.c.commentform', ''))));
     t.find('.commentform').append(wrapper.html());
     cw.after(t);
   } else {
@@ -292,7 +292,7 @@ clickHandlers.comment = function(e) {
       var pl = cwl.find(".add");
       if (pl.length) {
         pl.hide();
-        pl.before('<div class="c commentform">%(form)</div>'.replace('%(form)', wrapper.html()));
+        pl.before(_('.c.commentform', wrapper.html()));
       }
     }
   }
@@ -359,9 +359,18 @@ clickHandlers.expand = function(e) {
   if (!W) return;
 
   $.postJSON("/fetch-comments", {'note_id': id}, function(data) {
-      var C = $('<div class="cwl"><div class="ba"></div></div>');
-      var CS = $('<div class="cs">%(data)</div>'.replace('%(data)', data.html));
+      var C = $(_('.cwl', _('.ba')));
+      var CS = $(_('.cs', data.html));
       C.append(CS);
       W.replaceWith(C);
   }, P.find('.w'));
+};
+
+clickHandlers.more = function(e) {
+  var key = e.attr("data-next-key");
+  if (!key) return;
+  $.postJSON("/more", {'key': key}, function(data) {
+    e.parent().replaceWith($(data.html));
+  }, e.parent())
+  
 };

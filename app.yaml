@@ -20,5 +20,8 @@ handlers:
 - url: /s
   static_dir: static/
 
+- url: /stats.*
+  script: $PYTHON_LIB/google/appengine/ext/appstats/ui.py
+
 - url: /.*
   script: main.py

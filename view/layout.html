@@ -11,22 +11,18 @@
   </head>
   <body>
     <div id="user" class="ll g">
-      {% if user %}
-      {{ user.nickname }}&nbsp;|&nbsp;<a href="{{ url }}">Выйти</a>{% if admin %}&nbsp;|&nbsp;<a href="#" class="l_create">Написать</a>{% endif %}
-      {% else %}
-        <a href="{{ url }}">Войти</a>
-      {% endif %}
+      {*auth_block*}
     </div>
     <div class='clearfix' id='head'>
       <h1 id='title'>Ложное движение</h1>
       <div id='top' class='ll g'><a href="/faq">FAQ</a></div>
-      <div id='sub'>spLeanerSite v.3.1.</div>
+      <div id='sub'>spLeanerSite v.3.1</div>
     </div>
     <div id='container'>
       {% block content %}{% endblock %}
     </div>
     <div class='ll clearfix' id='foot'>
-      <div id='cp'>&copy; <a href="http://www.google.com/profiles/spleaner">Алексей Пегов</a>, 2008&#150;2010 (<a href="http://creativecommons.org/licenses/by-sa/3.0/us/">CC</a>)</div>
+      <div id='cp'>&copy; <a href="mailto:spleaner@gmail.com">Алексей Пегов</a>, 2008&#150;2010 (<a href="http://creativecommons.org/licenses/by-sa/3.0/us/">CC</a>)</div>
       <div>
         Еще:
         <a href='http://alexeypegov.com'>alexeypegov.com</a>
@@ -40,7 +36,7 @@
       <div class="buttons ll"><input type="submit" value="Добавить"/><a href="#" class="l_cancelComment">Отменить</a></div>
     </div>
     {% endif %}
-    
+
     {% if debug %}
     <script src="/js/jquery-1.4.2.min.js" type="text/javascript"></script>
     <script src="/js/jquery-ui-1.8.5.min.js" type="text/javascript"></script>
@@ -48,6 +44,7 @@
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="text/javascript"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.5/jquery-ui.min.js" type="text/javascript"></script>
     {% endif %}
-    <script src="/js/v2.js?v=1" type="text/javascript"></script>
+    <script src="/js/util.js?v=2" type="text/javascript"></script>
+    <script src="/js/v2.js?v=2" type="text/javascript"></script>
   </body>
 </html>

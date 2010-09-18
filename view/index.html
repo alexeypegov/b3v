@@ -1,14 +1,14 @@
 {% extends "layout.html" %}
 
 {% block content %}
-{% ifnotequal prev -1 %}
-<div id='nav' class="ll"><a href="/">&larr; Хоум</a></div>
-{% endifnotequal %}
 <div id='notes'>
 {% if entries %}
   {% for entry in entries %}
   {% include "note.html" %}
   {% endfor %}
+  {% if next %}
+  <div id="more"><a href="#" class="l_more" data-next-key="{{ next }}">Еще</a></div>
+  {% endif %}
 {% else %}
 <span class="empty-list">
 Здесь пока ничего нет :)
@@ -16,13 +16,5 @@
 {% endif %}
 </div>
 <div id="paging" class="ll clearfix">
-{% ifnotequal prev -1 %}
-{% ifequal prev 0 %}<a class="n_37" href="/">Предыдущая страница</a>{% else %}<a class="n_37" href="/{{ prev }}">Предыдущая страница</a>{% endifequal %}
-{% else %}<a class="d" nohref="true">Предыдущая страница</a>{% endifnotequal %}
-&nbsp;&nbsp;&nbsp;&nbsp;
-{% if next %}<a class="n_39" href="/{{ next }}">Следующая страница</a>{% else %}<a class="d" nohref="true">Следующая страница</a>{% endif %}
-{% if next %}<div class="c">&#8592;&nbsp;Ctrl&nbsp;&#8594;</div>{% else %}
-{% ifnotequal prev -1 %}<div class="c">&#8592;&nbsp;Ctrl&nbsp;&#8594;</div>{% endifnotequal %}
-{% endif %}
 </div>
 {% endblock %}
