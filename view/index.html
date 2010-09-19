@@ -3,12 +3,7 @@
 {% block content %}
 <div id='notes'>
 {% if entries %}
-  {% for entry in entries %}
-  {% include "note.html" %}
-  {% endfor %}
-  {% if next %}
-  <div id="more"><a href="#" class="l_more" data-next-key="{{ next }}">Еще</a></div>
-  {% endif %}
+  {% include "more.html" %}
 {% else %}
 <span class="empty-list">
 Здесь пока ничего нет :)

@@ -115,7 +115,6 @@ jQuery.fn.selectEmptyFormElement = function() {
   return empty != null;
 };
 
-
 function showProgress(at) {
   if (at && at.length > 0) {
     hideProgress();
@@ -180,9 +179,14 @@ $(function() {
 
     keyCodes[key[1]] = $(a);
   });
-});
-
-$(document).ready(function () {
+  
+  $(window).scroll(function() {
+    if ($("#more").length > 0) {
+      if ($(window).scrollTop() >= $("#notes").find(".note:last").offset().top - $(window).height()) {
+        load_more()
+      }
+    }
+  }); 
 });
 
 clickHandlers.create = function(e) {
@@ -366,11 +370,20 @@ clickHandlers.expand = function(e) {
   }, P.find('.w'));
 };
 
-clickHandlers.more = function(e) {
-  var key = e.attr("data-next-key");
-  if (!key) return;
-  $.postJSON("/more", {'key': key}, function(data) {
-    e.parent().replaceWith($(data.html));
-  }, e.parent())
+load_more = function() {
+  var m = $("#more");
+  if (m.length && !m.hasClass('loading')) {
+    var key = $("#more").attr('data-next-key');
+    if (!key) return;
+    m.show();
+    m.addClass('loading');
+    $.postJSON("/more", {'key': key}, function(data) {
+      var notes = $(data.html);
+      notes.css("display", "none");
+      m.replaceWith(notes);
+      notes.fadeIn()
+    }, m)
+  }
   
+  return false
 };

@@ -196,8 +196,8 @@ class MainHandler(webapp.RequestHandler, Helpers):
     if not cached:
       entries = Note.get_notes()
       template_values = {
-        'entries': entries[:-1],
-        'next': (len(entries) == IPP + 1) and str(entries[-2].key()) or False,
+        'entries': len(entries) == IPP + 1 and entries[:-1] or entries,
+        'next': len(entries) == IPP + 1 and str(entries[-2].key()) or False,
         'admin': kind == 'admin',
         'user': kind in ('admin', 'auth')
       }
@@ -216,8 +216,8 @@ class MoreHandler(webapp.RequestHandler, Helpers):
       key = db.Key(encoded=str_key)
       entries = Note.get_notes(key)
       template_values = {
-        'entries': entries,
-        'next': (len(entries) == IPP + 1) and str(entries[-2].key()) or False,
+        'entries': len(entries) == IPP + 1 and entries[:-1] or entries,
+        'next': len(entries) == IPP + 1 and str(entries[-2].key()) or False,
         'admin': kind == 'admin',
         'user': kind in ('admin', 'auth')
       }

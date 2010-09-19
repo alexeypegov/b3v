@@ -378,12 +378,6 @@ h2.lf {
   color: #222;
 }
 
-a.l_more {
-  color: #7070CC;
-  text-decoration: none;
-}
-
-a.l_more:hover {
-  color: blue;
-  text-decoration: underline;
+#more {
+  color: #555;
 }
