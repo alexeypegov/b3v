@@ -493,7 +493,13 @@ class FeedHandler(webapp.RequestHandler, Helpers):
 class FaqHandler(webapp.RequestHandler, Helpers):
   """ Will generate FAQ page """
   def get(self):
-    self.render(self.response, 'faq')
+    kind = self.user_kind()
+    cache_key = 'faq'
+    cached = self.get_cached(cache_key, namespace="static")
+    if not cached:
+      cached = self.get_html('faq', {'user': kind in ('admin', 'auth'), 'admin': kind == 'admin' })
+      memcache.set(cache_key, (cached, self.mod_count()), 3600 * 12, namespace="static")      
+    self.response.out.write(self.repl_auth_block(cached))
     
 class NotFoundPageHandler(webapp.RequestHandler, Helpers):
   """ Will render a 404 page """
