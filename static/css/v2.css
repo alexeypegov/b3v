@@ -195,6 +195,16 @@ h2.lf {
   color: #777;
 }
 
+#notes .note .title .tags .tag {
+  padding: 1px 5px;
+  
+  background-color: rgba(255, 255, 150, 0.5);
+
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+}
+
 #notes .note .title .info a {
   color: #7070CC;
   text-decoration: none;
