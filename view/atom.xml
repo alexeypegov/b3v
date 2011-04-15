@@ -21,7 +21,7 @@
    <link rel="alternate" type="text/html" href="{{ prefix }}{{ entry.uuid }}"/>
    <id>urn:uuid:{{ entry.uuid }}</id>
    <updated>{{ entry.w3cdtf }}</updated>
-   <content type="html">{{ entry.content|escape }}</content>
+   <content type="html">{{ entry.content|escape }}&lt;br/&gt;&lt;br/&gt;&lt;hr/&gt;&lt;div class="tags"&gt;Теги: &lt;span class="tag"&gt;{{ entry.tags|join:"&lt;/span&gt;, &lt;span class=\"tag\"&gt;"}}&lt;/span&gt;&lt;/div&gt;</content>
  </entry>
  {% endfor %}
  
