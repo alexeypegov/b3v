@@ -14,6 +14,10 @@ handlers:
   static_files: i/favicon.ico
   upload: i/favicon.ico
 
+- url: /robots.txt
+  static_files: static/robots.txt
+  upload: static/robots.txt
+
 - url: /js
   static_dir: static/js/
 
