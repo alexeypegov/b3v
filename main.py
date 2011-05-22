@@ -23,7 +23,7 @@ from google.appengine.api import mail
 from django.utils import simplejson
 from django.core.paginator import ObjectPaginator, InvalidPage
 
-"""Load custom Django template filters"""
+# Load custom Django template filters
 webapp.template.register_template_library('filters')
 
 IPP = 10
@@ -70,7 +70,8 @@ class Note(db.Model):
   @classmethod
   def get_notes(cls, key=None):
     if key:
-      return db.Query(Note).filter("__key__ < ", key).order('-__key__').fetch(IPP + 1)
+      note = db.Model.get(key)
+      return db.Query(Note).filter("created_at < ", note.created_at).order('-created_at').fetch(IPP + 1)
     return db.Query(Note).order('-created_at').fetch(IPP + 1)
     
   @classmethod
@@ -78,7 +79,7 @@ class Note(db.Model):
     return db.Query(Note).order('-created_at').fetch(10)
     
   def sorted_comments(self):
-    return Note.get_comments(self);
+    return Note.get_comments(self)
   
   @classmethod
   def get_comments(cls, _note):
@@ -264,7 +265,7 @@ class CreateHandler(webapp.RequestHandler, Helpers):
       note.put()
       self.inc_count()
       
-      self.ping_feedburner(self.request);
+      self.ping_feedburner(self.request)
       
       logging.debug('New note: %s' % note.title)
       
@@ -362,8 +363,8 @@ class CommentHandler(webapp.RequestHandler, Helpers):
     else:
       self.render_error_json(self.response, 'Login to be able to post comments!')
   
-  """ e-mail comment to admin & to recepient(s) if specified """
   def email_comment(self, request, note, comment, original_text):
+    """ e-mail comment to admin & to recipient(s) if specified """
     comments = Note.get_comments(note)
     authors = {}
     for c in comments:
