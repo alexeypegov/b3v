@@ -89,6 +89,14 @@ h2.lf {
   visibility: hidden;
 }
 
+.ll a.rss {
+  text-decoration: none;
+  background-color: #ff872b;
+  color: #fff;
+  border-radius: 3px 3px;
+  padding: 0 3px;
+}
+
 /*** USER ***/
 
 #user {
