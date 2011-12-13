@@ -24,6 +24,9 @@ handlers:
 - url: /s
   static_dir: static/
 
+- url: /idea-ui-diff
+  static_dir: static/diff
+
 - url: /stats.*
   script: $PYTHON_LIB/google/appengine/ext/appstats/ui.py
 
