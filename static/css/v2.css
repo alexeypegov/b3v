@@ -213,6 +213,10 @@ h2.lf {
   color: #777;
 }
 
+.info > .share > div,iframe {
+  vertical-align: bottom !important;
+}
+
 #notes .note .title .tags .tag {
   padding: 1px 5px;
   
