@@ -381,7 +381,8 @@ load_more = function() {
       var notes = $(data.html);
       notes.css("display", "none");
       m.replaceWith(notes);
-      notes.fadeIn()
+      notes.fadeIn();
+      $.getScript("http://platform.twitter.com/widgets.js") // to reinit twitter buttons :(
     }, m)
   }
   
