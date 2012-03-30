@@ -186,7 +186,26 @@ $(function() {
         load_more()
       }
     }
-  }); 
+  });
+  
+  var bar = $('.bar');
+  var top = bar.position().top;
+  var repl = $(_('.repl[style=height:%(h)px]'.replace('%(h)', bar.height())));
+  var old = $('#sub').text();
+  var _new = $('#title').text();
+  $(window).scroll(function(event) {
+    var st = $(this).scrollTop();
+    var bt = bar.position().top;
+    if (st >= bt && !bar.hasClass('bar-fixed')) {
+      bar.addClass('bar-fixed');
+      bar.parent().append(repl);
+      // $('#sub').text(_new);
+    } else if (st < top && bar.hasClass('bar-fixed')) {
+      bar.removeClass('bar-fixed')
+      $('.repl').remove();
+      // $('#sub').text(old);
+    }
+  });
 });
 
 clickHandlers.create = function(e) {

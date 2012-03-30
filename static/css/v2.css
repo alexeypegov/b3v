@@ -128,6 +128,22 @@ h2.lf {
   margin-bottom: 0;
 }
 
+#head .bar {
+  padding-bottom: 3px;
+}
+
+#head .bar-fixed {
+  position: fixed;
+  top: 0;
+  background-color: #fff;
+  left: 0;
+  right: 0;
+  padding: 0 2em;
+  padding-bottom: 3px;
+  box-shadow: 0 4px 4px -4px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: 0 4px 4px -4px rgba(0, 0, 0, 0.3);
+}
+
 #head #top {
   padding-top: 0.3em;
   float: right;
