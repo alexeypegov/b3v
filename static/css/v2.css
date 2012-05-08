@@ -26,6 +26,21 @@ img {
   padding: 0.5em 0;
 }
 
+@-moz-keyframes fadeIn {
+    from {opacity:0;}
+    to {opacity:1;}
+}
+
+@-webkit-keyframes fadeIn {
+    from {opacity:0;}
+    to {opacity:1;}
+}
+
+@keyframes fadeIn {
+    from {opacity:0;}
+    to {opacity:1;}
+}
+
 .lf {
   font-size: 130%;
 }
@@ -217,6 +232,10 @@ h2.lf {
 
 #notes .note {
   margin-bottom: 3em;
+  
+  -webkit-animation: fadeIn .2s;
+  -moz-animation: fadeIn .2s;
+  animation: fadeIn .2s;
 }
 
 #notes .note .title .name {

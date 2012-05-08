@@ -182,7 +182,8 @@ $(function() {
   
   $(window).scroll(function() {
     if ($("#more").length > 0) {
-      if ($(window).scrollTop() >= $("#notes").find(".note:last").offset().top - $(window).height()) {
+      var last = $(".note:last", $("#notes"));
+      if (window.scrollY >= ((last.offset().top + last.height()) - window.innerHeight * 3)) {
         load_more()
       }
     }
