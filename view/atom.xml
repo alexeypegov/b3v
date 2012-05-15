@@ -5,7 +5,7 @@
  <subtitle>spLeanerSite v.3.0.</subtitle>
  <icon>http://spleaner.appspot.com/i/favicon.png</icon>
  <link rel="self" href="http://feeds2.feedburner.com/false-movement"/>
- <link rel="alternate" type="text/html" href="http://spleaner.appspot.com/"/>
+ <link rel="alternate" type="text/html" href="http://alexeypegov.com/blog/"/>
  
  {% if entries %}<updated>{{ updated }}</updated>{% else %}<updated>2008-12-12T18:30:00Z</updated>{% endif %}
  
