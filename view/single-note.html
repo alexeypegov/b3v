@@ -3,9 +3,9 @@
 {% block content %}
 {% include "full.html" %}
 <div id="paging" class="ll clearfix">
-{% if newer %}<a class="n_37" href="/note/{{ newer.encoded_slug }}">Предыдущая заметка</a>{% else %}<a class="d" nohref="true">Предыдущая заметка</a>{% endif %}
+{% if newer %}<a class="n_37" href="/note/{{ newer.encoded_slug }}">Свежее</a>{% else %}<a class="d" nohref="true">Свежее</a>{% endif %}
 &nbsp;&nbsp;&nbsp;&nbsp;
-{% if older %}<a class="n_39" href="/note/{{ older.encoded_slug }}">Следующая заметка</a>{% else %}<a class="d" nohref="true">Следующая заметка</a>{% endif %}
+{% if older %}<a class="n_39" href="/note/{{ older.encoded_slug }}">Старое</a>{% else %}<a class="d" nohref="true">Старое</a>{% endif %}
 {% if older %}<div class="c">&#8592;&nbsp;Ctrl&nbsp;&#8594;</div>{% else %}
 {% if newer %}<div class="c">&#8592;&nbsp;Ctrl&nbsp;&#8594;</div>{% endif %}
 {% endif %}
