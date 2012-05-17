@@ -1,47 +1,108 @@
 body {
-}
-
-#title {
-  text-align: center;
-  font-weight: bold;
+  margin: 0;
 }
 
 #head {
-  margin: 0 1em;
+  margin: 0;
+  margin-bottom: 1em;
+}
+
+#head > #title {
+  margin: 0;
+  padding: .5em;
+  text-align: center;
+  border: 0;
+/*  background-color: #d1dbbd;*/
+  background-color: #222;
+  color: #fff;
+}
+
+#head > #title > a {
+  color: #fff;
+}
+
+p {
+  margin-top: .3em;
 }
 
 #user {
   font-size: 175%;
   background-color: #eee;
   text-align: center;
+  margin: 0;
 }
 
-.bar {
+#user > a {
+  color: #bbb;
+}
+
+#head > .bar {
   display: none;
+  height: 0;
+  padding: 0;
+  margin: 0;
 }
 
 #container {
-  margin: 0 1em;
+  margin: 0 .5em;
+  padding: 0;
 }
 
 #notes {
+  margin: 0;
+  padding: 0;
   width: auto;
 }
 
+#container > #notes > #nav {
+  display: none;
+}
+
+#container > #paging {
+  font-size: 100%;
+}
+
+#container > #paging > .c {
+  display: none;
+}
+
+#container > #paging > a {
+  text-shadow: 0 -1px 1px #64799E;
+  text-transform: uppercase;
+  box-shadow: inset 0 1px 0 0 #aec3e5;
+  padding: .3em .5em;
+  border-radius: 3px;
+  border: 1px solid #999;
+  background-color: #A5B8DA;
+  background-image: -webkit-linear-gradient(top, #A5B8DA, #7089B3);
+  border-top: 1px solid #758FBA;
+  border-right: 1px solid #6C84AB;
+  border-bottom: 1px solid #5C6F91;
+  border-left: 1px solid #6C84AB;
+  color: #fff;
+}
+
+#container > #paging > a.d {
+  text-shadow: 0 -1px 1px #bbb;
+  box-shadow: inset 0 1px 0 0 #eee;
+  color: #777;
+  background-color: #bbb;
+  border-top: 1px solid #ccc;
+  border-right: 1px solid #bbb;
+  border-bottom: 1px solid #aaa;
+  border-left: 1px solid #bbb;
+  background-image: -webkit-linear-gradient(top, #eee, #ccc);
+}
+
 #notes .note {
+  margin: 0;
   margin-bottom: 1em;
   padding-bottom: 1em;
   border-bottom: 1px dashed #ddd;
 }
 
-#notes .note .title {
-/*  text-overflow: ellipsis;*/
-/*  white-space: nowrap;*/
-/*  overflow: hidden;*/
-}
-
 #notes .note .title .name {
-  font-size: 175%;
+  font-size: 150%;
 }
 
 #notes .note .title .info {
@@ -51,7 +112,8 @@ body {
 }
 
 #notes .note .text {
-  margin: 1em 0;
+  margin: .5em 0;
+/*  margin-bottom: .5em;*/
   font-size: 110%;
 }
 
@@ -74,4 +136,8 @@ body {
 .commentform .buttons {
   font-size: 110%;
   padding-top: 15px;
+}
+
+#foot {
+  display: none;
 }
