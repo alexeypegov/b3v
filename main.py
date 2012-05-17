@@ -170,19 +170,29 @@ class Helpers:
     memcache.incr('modification_count', initial_value = 0)
   
   def get_cached(self, key, namespace=None):
+    if is_dev_env():
+      return None
+    
     v = memcache.get(key, namespace=namespace)
     if v:
       logging.debug('Cached for %s [%s == %s]' % (key, str(v[1]), str(self.mod_count())))
       return v[1] == self.mod_count() and v[0] or None
     return None
+
+  def iphone(self):
+    uastring = self.request.headers.get('user_agent')
+    return "Mobile" in uastring and "Safari" in uastring
     
   def repl_auth_block(self, _s):
     user = users.get_current_user()
     if user:
       url = users.create_logout_url(self.request.uri)
-      s = "%s&nbsp;|&nbsp;<a href=\"%s\">Выйти</a>" % (user.nickname(), url)
-      if users.is_current_user_admin():
-        s += "&nbsp;|&nbsp;<a href=\"#\" class=\"l_create\">Написать</a>"
+      if self.iphone():
+        s = "<a href=\"%s\">Выйти</a>" % url
+      else:
+        s = "%s&nbsp;|&nbsp;<a href=\"%s\">Выйти</a>" % (user.nickname(), url)
+        if users.is_current_user_admin():
+          s += "&nbsp;|&nbsp;<a href=\"#\" class=\"l_create\">Добавить</a>"
       return _s.replace("{*auth_block*}", s)
     else:
       url = users.create_login_url(self.request.uri)

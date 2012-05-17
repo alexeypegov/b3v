@@ -207,6 +207,22 @@ $(function() {
       // $('#sub').text(old);
     }
   });
+  
+  if(window.iphone) {
+    window.addEventListener("load",function() {
+    	setTimeout(function(){
+    		window.scrollTo(0, 1);
+    	}, 0);
+    });
+    
+    var viewportmeta = document.querySelector('meta[name="viewport"]');
+      if (viewportmeta) {
+        viewportmeta.content = 'width=device-width, minimum-scale=1.0, maximum-scale=1.0, initial-scale=1.0';
+        document.body.addEventListener('gesturestart', function () {
+          viewportmeta.content = 'width=device-width, minimum-scale=0.25, maximum-scale=1.6';
+      }, false);
+    }
+  }
 });
 
 clickHandlers.create = function(e) {
@@ -249,13 +265,16 @@ clickHandlers.cancelCreate = function(e) {
 
 clickHandlers.remove = function(e) {
   if (confirm('Удалить заметку?')) {
-    var P = e.parents(".note");
+    var P = e.parents("#note-form");
     if (!P) return;
-    var id = P.find('input[type=hidden]').attr('value');
+
+    var id = P.attr("data-id");
     if (!id) return;
+
     $.postJSON("/delete", {'note_id': id}, function(data) {
       if (data.status) {
         P.remove();
+        $("#{0}".replace("{0}", id)).remove();
       } else {
         alert('Ошибка удаления!');
       }
@@ -264,11 +283,11 @@ clickHandlers.remove = function(e) {
 };
 
 clickHandlers.edit = function(e) {
-  var P = e.parents(".note");
-  if (!P) return;
-  var id = P.find('input[type=hidden]').attr('value');
+  var id = e.parents(".admin").attr("data-id");
   if (!id) return;
-  
+
+  var P = $("#{0}".replace('{0}', id));
+
   // avoid multi-processing while waiting response from server
   var existing_marker = $('#e_mark');
   if (existing_marker.length > 0) {
@@ -402,7 +421,6 @@ load_more = function() {
       notes.css("display", "none");
       m.replaceWith(notes);
       notes.fadeIn();
-      $.getScript("http://platform.twitter.com/widgets.js") // to reinit twitter buttons :(
     }, m)
   }
   

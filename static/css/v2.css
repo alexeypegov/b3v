@@ -1,3 +1,14 @@
+@font-face {
+  font-family: 'ModernPictogramsNormal';
+  src: url('modernpics-webfont.eot');
+  src: url('modernpics-webfont.eot?#iefix') format('embedded-opentype'),
+       url('modernpics-webfont.woff') format('woff'),
+       url('modernpics-webfont.ttf') format('truetype'),
+       url('modernpics-webfont.svg#ModernPictogramsNormal') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
 body, p, form {
   margin: 0;
 }
@@ -24,6 +35,11 @@ input[type=text] {
 img {
   border: 0;
   padding: 0.5em 0;
+}
+
+.icon {
+/*  font-size: 150%;*/
+  font-family: "ModernPictogramsNormal";
 }
 
 @-moz-keyframes fadeIn {
@@ -218,6 +234,12 @@ h2.lf {
   color: #666;
 }
 
+#note-form .l_remove {
+  text-decoration: none;
+  color: #f00;
+  font-size: 150%;
+}
+
 /*** NAVIGATION ***/
 
 #container #nav {
@@ -252,15 +274,36 @@ h2.lf {
   vertical-align: bottom !important;
 }
 
+#notes .note .title .tags {
+}
+
+
 #notes .note .title .tags .tag {
-  padding: 1px 5px;
-  
+  margin: 0 2px;
+  padding: 1px 3px;
+  border: 1px solid rgba(0, 0, 0, .1);
   background-color: rgba(255, 255, 150, 0.5);
 
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   border-radius: 3px;
 }
+
+.admin {
+  position: absolute;
+  font-size: 150%;
+  display: block;
+}
+
+.admin a {
+  color: rgba(55, 55, 55, 1);
+  text-decoration: none;
+}
+
+#notes .note .title .admin a {
+  color: #000;
+}
+
 
 #notes .note .title .info a {
   color: #7070CC;

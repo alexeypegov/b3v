@@ -1,0 +1,77 @@
+body {
+}
+
+#title {
+  text-align: center;
+  font-weight: bold;
+}
+
+#head {
+  margin: 0 1em;
+}
+
+#user {
+  font-size: 175%;
+  background-color: #eee;
+  text-align: center;
+}
+
+.bar {
+  display: none;
+}
+
+#container {
+  margin: 0 1em;
+}
+
+#notes {
+  width: auto;
+}
+
+#notes .note {
+  margin-bottom: 1em;
+  padding-bottom: 1em;
+  border-bottom: 1px dashed #ddd;
+}
+
+#notes .note .title {
+/*  text-overflow: ellipsis;*/
+/*  white-space: nowrap;*/
+/*  overflow: hidden;*/
+}
+
+#notes .note .title .name {
+  font-size: 175%;
+}
+
+#notes .note .title .info {
+  display: block;
+  text-align: right;
+  padding: .5em 0;
+}
+
+#notes .note .text {
+  margin: 1em 0;
+  font-size: 110%;
+}
+
+#notes .note .text img, iframe, object {
+  max-width: 100%;
+}
+
+.cwl, .cw {
+  margin-left: 0;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 110%;
+}
+
+.cwl textarea {
+  box-sizing: border-box;
+  font-size: 110%;
+}
+
+.commentform .buttons {
+  font-size: 110%;
+  padding-top: 15px;
+}

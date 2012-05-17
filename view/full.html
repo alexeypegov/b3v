@@ -2,11 +2,11 @@
 <div id='notes'>
 <div id='nav' class="ll"><a href="/">&larr; Хоум</a></div>
 {% endblock %}
-<div class='note'>
+<div class='note' id="{{ entry.key.id }}">
   <input type="hidden" name="note_id" value="{{ entry.key.id }}"/>
   <div class='title'>
-    <span class='name'><a href="/note/{{ entry.encoded_slug }}">{{ entry.title|escape }}</a></span><span class='info'><span>&nbsp;&#151;&nbsp;{{ entry.created_at|localize_date }}&nbsp;|</span>
-    <span class='tags'><span class="tag">{{ entry.tags|join:"</span>, <span class=\"tag\">" }}</span></span>{% include "share.html" %}{% if admin %} [ <a href="#" class="l_edit">редактировать</a>, <a href="#" class="l_remove">удалить</a> ]{% endif %}</span>
+    <span class='name'><a href="/note/{{ entry.encoded_slug }}">{{ entry.title|escape }}</a></span><span class='info'><span>&nbsp;&#151;&nbsp;{{ entry.created_at|localize_date }}&nbsp;<span class="icon">|</span></span>
+    <span class='tags'><span class="tag">{{ entry.tags|join:"</span><span class=\"tag\">" }}</span></span></span>
   </div>
   <div class='text'>{{ entry.content }}</div>
   {% block comments %}
