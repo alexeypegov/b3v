@@ -114,7 +114,7 @@ p {
 #notes .note .text {
   margin: .5em 0;
 /*  margin-bottom: .5em;*/
-  font-size: 110%;
+  font-size: 100%;
 }
 
 #notes .note .text img, iframe, object {
@@ -126,16 +126,16 @@ p {
   margin-left: 0;
   width: 100%;
   box-sizing: border-box;
-  font-size: 110%;
+  font-size: 100%;
 }
 
 .cwl textarea {
   box-sizing: border-box;
-  font-size: 110%;
+  font-size: 100%;
 }
 
 .commentform .buttons {
-  font-size: 110%;
+  font-size: 100%;
   padding-top: 15px;
 }
 
