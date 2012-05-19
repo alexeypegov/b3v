@@ -117,10 +117,14 @@ p {
   font-size: 100%;
 }
 
-#notes .note .text img, iframe, object {
+#notes .note .text img, iframe {
   max-width: 100%;
   max-height: 300px;
   height: auto;
+}
+
+#notes .note .text object {
+  display: none;
 }
 
 .cwl, .cw {
