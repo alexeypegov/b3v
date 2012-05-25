@@ -127,6 +127,18 @@ p {
   height: auto;
 }
 
+#notes .note .text ul, ol {
+  padding-left: 2em;
+}
+
+#notes .note .text li {
+  padding-bottom: .5em;
+}
+
+#notes .note .text pre {
+  overflow-x: hidden;
+}
+
 #notes .note .text object {
   display: none;
 }
