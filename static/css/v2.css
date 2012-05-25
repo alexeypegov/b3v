@@ -462,6 +462,7 @@ h2.lf {
 #paging {
   text-align: center;
   font-size: 90%;
+  color: #777;
 }
 
 #paging a.d {
@@ -476,6 +477,24 @@ h2.lf {
   font-size: 90%;
   color: #aaa;
   margin-top: 0.3em;
+}
+
+#paging .key {
+  padding: .1em .6em;
+  border: 1px solid #ccc;
+  background-color: #f7f7f7;
+  color: #333;
+  border-radius: 3px;
+  -moz-border-radius: 3px;
+  box-shadow: 1px 1px 1px #ccc;
+}
+
+#paging a:first-child, span.key:first-child {
+  margin-right: 10px;
+}
+
+#paging a:last-child, span.key:last-child {
+  margin-left: 10px;
 }
 
 /*** STATIC ***/

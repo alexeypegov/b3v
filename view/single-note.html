@@ -3,11 +3,10 @@
 {% block content %}
 {% include "full.html" %}
 <div id="paging" class="ll clearfix">
-{% if newer %}<a class="n_37" href="/note/{{ newer.encoded_slug }}">Раньше</a>{% else %}<a class="d" nohref="true">Раньше</a>{% endif %}
-&nbsp;&nbsp;&nbsp;&nbsp;
-{% if older %}<a class="n_39" href="/note/{{ older.encoded_slug }}">Позже</a>{% else %}<a class="d" nohref="true">Позже</a>{% endif %}
-{% if older %}<div class="c">&#8592;&nbsp;Ctrl&nbsp;&#8594;</div>{% else %}
-{% if newer %}<div class="c">&#8592;&nbsp;Ctrl&nbsp;&#8594;</div>{% endif %}
+{% if newer %}&#8592;&nbsp;<a class="n_75" href="/note/{{ newer.encoded_slug }}">Раньше</a>{% else %}&#8592;&nbsp;<a class="d" nohref="true">Раньше</a>{% endif %}
+{% if older %}<a class="n_74" href="/note/{{ older.encoded_slug }}">Позже</a>&nbsp;&#8594;{% else %}<a class="d" nohref="true">Позже</a>&nbsp;&#8594;{% endif %}
+{% if older %}<div class="c"><span class="key">K</span><span class="key">J</span></div>{% else %}
+{% if newer %}<div class="c"><span class="key">K</span><span class="key">J</span></div>{% endif %}
 {% endif %}
 </div>
 {% endblock %}

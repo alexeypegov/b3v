@@ -162,7 +162,7 @@ $(function() {
   });
 
   $(document).keydown(function(e) {
-    if (e.ctrlKey) {
+    if (e.target.tagName != "INPUT" && e.target.tagName != "TEXTAREA") {
       var anchor = keyCodes['' + e.keyCode];
       if (anchor) {
         executeLink(anchor);

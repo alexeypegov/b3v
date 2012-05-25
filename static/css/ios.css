@@ -36,6 +36,10 @@ p {
   color: #bbb;
 }
 
+.admin {
+  display: none;
+}
+
 #head > .bar {
   display: none;
   height: 0;
